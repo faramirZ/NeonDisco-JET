@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# Data files (common in bioinformatics)
+*.bam
+*.bai
+*.vcf
+*.vcf.gz
+*.tbi
+*.fastq
+*.fq
+*.fasta
+*.fa
+*.gz
+
+# Conda
+.conda/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Large files
+*.zip
+*.tar.gz
+*.sif
+*.gtf
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml

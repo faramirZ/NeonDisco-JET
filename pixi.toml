@@ -1,0 +1,12 @@
+[workspace]
+authors = ["faramirZ <faramirzailan@gmail.com>"]
+channels = ["conda-forge", "bioconda"]
+name = "neondisco-jet"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+star = "*"
+samtools = "1.3.*"
