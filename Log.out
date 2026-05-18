@@ -321,7 +321,7 @@ twopassMode                       None
 ----------------------------------------
 
 Finished loading and checking parameters
-May 18 02:17:50 ... starting to generate Genome files
+May 18 03:21:38 ... starting to generate Genome files
 /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 0  "1" chrStart: 0
 /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 1  "10" chrStart: 249036800
 /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 2  "11" chrStart: 382992384
@@ -517,63 +517,24 @@ May 18 02:17:50 ... starting to generate Genome files
 /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 192  "KI270392.1" chrStart: 3137863680
 /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.dna.primary_assembly.fa : chr # 193  "KI270394.1" chrStart: 3138125824
 Number of SA indices: 5897255510
-May 18 02:18:38 ... starting to sort Suffix Array. This may take a long time...
+May 18 03:22:29 ... starting to sort Suffix Array. This may take a long time...
 Number of chunks: 27;   chunks size limit: 1854240296 bytes
-May 18 02:18:53 ... sorting Suffix Array chunks and saving them to disk...
-Writing 1695044400 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_3 ; empty space on disk = 1793051840512 bytes ... done
-Writing 1625576352 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_2 ; empty space on disk = 1791356792832 bytes ... done
-Writing 1791034696 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_7 ; empty space on disk = 1789731205120 bytes ... done
-Writing 1802540216 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_5 ; empty space on disk = 1787940167680 bytes ... done
-Writing 1641833696 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_1 ; empty space on disk = 1786137620480 bytes ... done
-Writing 1842920360 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_6 ; empty space on disk = 1784495779840 bytes ... done
-Writing 1817086728 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_0 ; empty space on disk = 1782652858368 bytes ... done
-Writing 1732397648 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_4 ; empty space on disk = 1780835762176 bytes ... done
-Writing 1739863496 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_10 ; empty space on disk = 1779103354880 bytes ... done
-Writing 1610611616 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_8 ; empty space on disk = 1777363484672 bytes ... done
-Writing 1731265392 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_14 ; empty space on disk = 1775752867840 bytes ... done
-Writing 1749272088 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_12 ; empty space on disk = 1774021595136 bytes ... done
-Writing 1817090664 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_9 ; empty space on disk = 1772272320512 bytes ... done
-Writing 1834070088 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_15 ; empty space on disk = 1770455220224 bytes ... done
-Writing 1667201488 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_13 ; empty space on disk = 1768621146112 bytes ... done
-Writing 1778262496 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_11 ; empty space on disk = 1766953943040 bytes ... done
-Writing 1817679360 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_16 ; empty space on disk = 1765175664640 bytes ... done
-Writing 1831310032 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_17 ; empty space on disk = 1763357978624 bytes ... done
-Writing 1704350256 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_23 ; empty space on disk = 1761526665216 bytes ...Writing 1817115672 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_19 ; empty space on disk = 1761024520192 bytes ... done
- done
-Writing 1701441448 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_20 ; empty space on disk = 1758005182464 bytes ... done
-Writing 1778814456 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_21 ; empty space on disk = 1756303736832 bytes ... done
-Writing 1704549168 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_18 ; empty space on disk = 1754524921856 bytes ... done
-Writing 1758878384 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_22 ; empty space on disk = 1752820363264 bytes ... done
-Writing 1826890544 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_24 ; empty space on disk = 1751061479424 bytes ... done
-Writing 1543849472 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_25 ; empty space on disk = 1749234581504 bytes ... done
-Writing 1817093864 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_26 ; empty space on disk = 1747690725376 bytes ... done
-May 18 02:55:25 ... loading chunks from disk, packing SA...
-May 18 02:56:50 ... finished generating suffix array
-May 18 02:56:50 ... generating Suffix Array index
-May 18 03:03:56 ... completed Suffix Array index
-May 18 03:03:56 ..... processing annotations GTF
-Processing sjdbGTFfile=/home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.115.gtf, found:
-		509650 transcripts
-		3683354 exons (non-collapsed)
-		621899 collapsed junctions
-May 18 03:04:29 ..... finished GTF processing
-May 18 03:04:29   Loaded database junctions from the GTF file: /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.115.gtf: 621899 total junctions
-
-May 18 03:04:30   Finished preparing junctions
-May 18 03:04:30 ..... inserting junctions into the genome indices
-May 18 03:08:19   Finished SA search: number of new junctions=621870, old junctions=0
-May 18 03:10:02   Finished sorting SA indicesL nInd=248748000
-May 18 03:11:41   Finished inserting junction indices
-May 18 03:12:46   Finished SAi
-May 18 03:12:47 ..... finished inserting junctions into genome
-May 18 03:12:47 ... writing Genome to disk ...
-Writing 3263383838 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/Genome ; empty space on disk = 1792786804736 bytes ... done
-SA size in bytes: 25352264482
-May 18 03:12:51 ... writing Suffix Array to disk ...
-Writing 25352264482 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA ; empty space on disk = 1789523419136 bytes ... done
-May 18 03:13:20 ... writing SAindex to disk
-Writing 8 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SAindex ; empty space on disk = 1764171145216 bytes ... done
-Writing 120 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SAindex ; empty space on disk = 1764171145216 bytes ... done
-Writing 1565873491 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SAindex ; empty space on disk = 1764171145216 bytes ... done
-May 18 03:13:23 ..... finished successfully
-DONE: Genome generation, EXITING
+May 18 03:22:45 ... sorting Suffix Array chunks and saving them to disk...
+Writing 1625576352 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_2 ; empty space on disk = 1762605260800 bytes ... done
+Writing 1791034696 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_7 ; empty space on disk = 1760979677184 bytes ... done
+Writing 1817086728 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_0 ; empty space on disk = 1759188635648 bytes ... done
+Writing 1641833696 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_1 ; empty space on disk = 1757371547648 bytes ... done
+Writing 1802540216 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_5 ; empty space on disk = 1755729711104 bytes ... done
+Writing 1695044400 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_3 ; empty space on disk = 1753927168000 bytes ... done
+Writing 1842920360 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_6 ; empty space on disk = 1752232120320 bytes ... done
+Writing 1732397648 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_4 ; empty space on disk = 1750389194752 bytes ... done
+Writing 1739863496 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_10 ; empty space on disk = 1748656775168 bytes ... done
+Writing 1610611616 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_8 ; empty space on disk = 1746916904960 bytes ... done
+Writing 1817090664 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_9 ; empty space on disk = 1745306292224 bytes ... done
+Writing 1834070088 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_15 ; empty space on disk = 1743489191936 bytes ... done
+Writing 1778262496 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_11 ; empty space on disk = 1741655117824 bytes ... done
+Writing 1749272088 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_12 ; empty space on disk = 1739876851712 bytes ... done
+Writing 1731265392 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_14 ; empty space on disk = 1738127568896 bytes ... done
+Writing 1667201488 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_13 ; empty space on disk = 1736396300288 bytes ... done
+Writing 1831310032 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_17 ; empty space on disk = 1734729084928 bytes ... done
+Writing 1817115672 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_19 ; empty space on disk = 1732897767424 bytes ... done

@@ -42,6 +42,7 @@ ENV/
 *.tar.gz
 *.sif
 *.gtf
+*.out
 
 # pixi environments
 .pixi/*
