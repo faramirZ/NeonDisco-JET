@@ -544,3 +544,7 @@ Writing 1704549168 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA
 Writing 1701441448 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_20 ; empty space on disk = 1725854056448 bytes ... done
 Writing 1778814456 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_21 ; empty space on disk = 1724152602624 bytes ... done
 Writing 1758878384 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_22 ; empty space on disk = 1722373783552 bytes ... done
+Writing 1826890544 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_24 ; empty space on disk = 1720614899712 bytes ... done
+Writing 1543849472 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_25 ; empty space on disk = 1718788005888 bytes ... done
+Writing 1817093864 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_26 ; empty space on disk = 1717244145664 bytes ... done
+May 18 03:49:52 ... loading chunks from disk, packing SA...
