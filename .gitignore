@@ -43,6 +43,7 @@ ENV/
 *.sif
 *.gtf
 *.out
+Log.out
 
 # pixi environments
 .pixi/*
