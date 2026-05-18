@@ -53,7 +53,7 @@ cmd="${starBinDir}/STAR \
     --sjdbGTFfile ${gtfGeneFile} \
     --sjdbOverhang ${readLength}"
 echo ${cmd}
-eval "time ${cmd}"
+#eval "time ${cmd}"
 
 
 #-------------------------------------------------------
@@ -140,6 +140,7 @@ do
         ${samtoolsBinDir}/samtools index ${bamFile}"
 
     echo ${cmd}
+    eval "${cmd}"
 
     date=`date +"%Y%m%d_%Hh%Mm%Ss"`
     echo -e "${name}\tSTAR alignment:\t${cmd}\t${date}" >> ${logFile}
