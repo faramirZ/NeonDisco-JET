@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #### created by Alexandre Houy and Christel Goudot
-#### modified and adapted by Ares Rocanin-Arjo
+#### modified and adapted by Muhammad Faramir
 
 #-------------------------------------------------------
 ##-- Configuration
@@ -60,7 +60,8 @@ echo ${cmd}
 ##-- STEP 1: STAR alignment (per sample loop)
 #-------------------------------------------------------
 
-while read fastqR1Filegz fastqR2Filegz name   # metadata columns: R1 path, R2 path, sample name
+# metadata columns: R1 path, R2 path, sample name
+while read fastqR1Filegz fastqR2Filegz name;
 do
     echo -e "\e[1m${name}\e[0m" >> ${logFile}
 

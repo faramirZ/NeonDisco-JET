@@ -194,4 +194,4 @@ RscriptDir= _introducePATH_
 
 done < ${infoFile}
 
-echo -e "END" >> ${logFile}	
+echo -e "END" >> ${logFile}

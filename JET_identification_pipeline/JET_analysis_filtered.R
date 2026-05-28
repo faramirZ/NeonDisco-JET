@@ -11,10 +11,10 @@ tall = Sys.time()
 
 
 #!!!
-r.path    = _introducePATH_  # Local directory of R packages
+r.path    = paste("/home/faramir/R/x86_64-pc-linux-gnu-library/4.5")# Local directory of R packages
 R         = paste(R.Version()$major, strsplit(x = as.character(R.Version()$minor), split = "\\.")[[1]][1], sep = ".")
 #!!!
-lib.local = paste( _instroducePATH_ ) #path to R library if specific
+##lib.local = paste( _instroducePATH_ ) #path to R library if specific
 
 #dir.create(lib.local, showWarnings = F, recursive = T)
 .libPaths(new = lib.local)
@@ -115,7 +115,7 @@ if(genome %in% c("hg19")){
 }
 
 #!!!
-repeats.file = _introduce PATH/name_ #path to the reeatmasker obtained at UCSC as indicated in the README
+##repeats.file = _introduce PATH/name_ #path to the reeatmasker obtained at UCSC as indicated in the README
 
 if(verbose) cat("Loading genome data")
 

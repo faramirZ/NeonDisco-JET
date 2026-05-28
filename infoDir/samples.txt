@@ -1,1 +1,1 @@
-/home/faramir/repos/neondisco-jet/inputData/379T_R1.fastq.gz	/home/faramir/repos/neondisco-jet/inputData/379T_R2.fastq.gz	379T
+/home/faramir/repos/neondisco-jet/inputData/379T_R1.fastq.gz	/home/faramir/repos/neondisco-jet/inputData/379T_R2.fastq.gz	379T	20260518

@@ -548,3 +548,32 @@ Writing 1826890544 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA
 Writing 1543849472 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_25 ; empty space on disk = 1718788005888 bytes ... done
 Writing 1817093864 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA_26 ; empty space on disk = 1717244145664 bytes ... done
 May 18 03:49:52 ... loading chunks from disk, packing SA...
+May 18 03:51:12 ... finished generating suffix array
+May 18 03:51:12 ... generating Suffix Array index
+May 18 03:55:07 ... completed Suffix Array index
+May 18 03:55:07 ..... processing annotations GTF
+Processing sjdbGTFfile=/home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.115.gtf, found:
+		509650 transcripts
+		3683354 exons (non-collapsed)
+		621899 collapsed junctions
+May 18 03:55:38 ..... finished GTF processing
+May 18 03:55:38   Loaded database junctions from the GTF file: /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.115.gtf: 621899 total junctions
+
+May 18 03:55:38   Finished preparing junctions
+May 18 03:55:38 ..... inserting junctions into the genome indices
+May 18 03:57:37   Finished SA search: number of new junctions=621870, old junctions=0
+May 18 03:58:53   Finished sorting SA indicesL nInd=248748000
+May 18 04:00:15   Finished inserting junction indices
+May 18 04:00:47   Finished SAi
+May 18 04:00:48 ..... finished inserting junctions into genome
+May 18 04:00:48 ... writing Genome to disk ...
+Writing 3263383838 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/Genome ; empty space on disk = 1765868650496 bytes ... done
+SA size in bytes: 25352264482
+May 18 04:00:51 ... writing Suffix Array to disk ...
+Writing 25352264482 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SA ; empty space on disk = 1787957530624 bytes ... done
+May 18 04:01:14 ... writing SAindex to disk
+Writing 8 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SAindex ; empty space on disk = 1764171141120 bytes ... done
+Writing 120 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SAindex ; empty space on disk = 1764171141120 bytes ... done
+Writing 1565873491 bytes into /home/faramir/data/neondisco-jet/starIndexesDir/SAindex ; empty space on disk = 1764171141120 bytes ... done
+May 18 04:01:16 ..... finished successfully
+DONE: Genome generation, EXITING
