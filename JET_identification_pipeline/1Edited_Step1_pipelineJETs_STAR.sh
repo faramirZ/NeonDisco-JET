@@ -61,7 +61,7 @@ echo ${cmd}
 #-------------------------------------------------------
 
 # metadata columns: R1 path, R2 path, sample name
-while read fastqR1Filegz fastqR2Filegz name;
+while read fastqR1Filegz fastqR2Filegz name day;
 do
     echo -e "\e[1m${name}\e[0m" >> ${logFile}
 
