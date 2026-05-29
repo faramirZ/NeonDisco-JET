@@ -48,3 +48,4 @@ Log.out
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+metadataDir/379T.repeatmasker_reformat.txt
