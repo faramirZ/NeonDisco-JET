@@ -112,7 +112,7 @@ RscriptDir= _introducePATH_
    
 	echo -e "Starting size loop" >> ${logFile} #for each JET sequence we performed a peptide prediction of 8-11 aa
 
-    	for size in `seq 8 11`
+    	for size in `seq ${start} ${end}`
 	 	  do
 
 			############################################################################

@@ -44,6 +44,7 @@ libsize        = ifelse(is.null(opt$libsize), NA, opt$libsize)
 
 # Normalise genome name to UCSC style internally
 if(genome == "GRCh38") genome = "hg38"
+if(genome == "GRCm38") genome = "mm10"
 
 # minjunc threshold for filtering junctions
 minjunc = 2
@@ -61,7 +62,7 @@ if(flag) stop(getopt(spec, usage = T))
 ##### Libraries #####
 #--------------------------------------------------------------------------------
 
-if(verbose) cat("Loading packages")
+if(verbose) cat("Loading packages\n")
 t = Sys.time()
 ipak = function(list.packages){
     list.new.packages = list.packages[!(list.packages %in% installed.packages()[, "Package"])]
@@ -75,6 +76,8 @@ ipak = function(list.packages){
 list.packages = c("GenomicFeatures",
                   "GenomicAlignments",
                   "GenomeInfoDb",
+                  "txdbmaker",
+                  "AnnotationDbi",
                   "data.table",
                   "scales",
                   "ggbio",
@@ -90,13 +93,13 @@ if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), 
 if(genome %in% c("hg19")){
     organism    = "Human"
     chromosomes = paste0("chr", c(1:22, "X"))
-    bs          = paste("BSgenome", "Hsapiens", "UCSC", genome, sep = ".")
+    bs          = "BSgenome.Hsapiens.UCSC.hg19"
     txdb        = paste("TxDb", "Hsapiens", "UCSC", genome, "ensGene", sep = ".")
 } else if(genome %in% c("hg38")){
     organism    = "Human"
     chromosomes = paste0("chr", c(1:22, "X"))
     bs          = "BSgenome.Hsapiens.UCSC.hg38"
-    txdb        = "TxDb.Hsapiens.UCSC.hg38.knownGene"
+    txdb        = NULL  # will be built from GTF below
 } else if(genome %in% c("mm9", "mm10")){
     organism    = "Mouse"
     chromosomes = paste0("chr", c(1:19, "X"))
@@ -107,17 +110,60 @@ if(genome %in% c("hg19")){
 # Path to RepeatMasker file downloaded from UCSC
 repeats.file = "/home/faramir/repos/neondisco-jet/metadataDir/379T.repeatmasker_reformat.txt"
 
-if(verbose) cat("Loading genome data")
-t = Sys.time()
-data(ideo)
-genome.ideo         = suppressMessages(ideo[["hg19"]])
-genome.ideo         = keepSeqlevels(x = genome.ideo, value = chromosomes, pruning.mode = "coarse")
-genome(genome.ideo) = genome
+# Path to Ensembl GTF file (used for building TxDb for hg38)
+gtf.file = "/home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.115.gtf"
 
-ipak.gen     = ipak(c(txdb, bs))
-genome.bs    = eval(parse(text = bs))
-genome.txdb  = eval(parse(text = txdb))
-genome.txdb  = keepSeqlevels(x = genome.txdb, value = chromosomes, pruning.mode = "coarse")
+# Path to cache the built TxDb so it only needs to be built once
+txdb.cache = "/home/faramir/repos/neondisco-jet/metadataDir/GRCh38_115.txdb"
+
+
+if(verbose) cat("Loading genome data\n")
+t = Sys.time()
+
+# Load BSgenome — used as the source of chromosome lengths throughout the script
+# genome.ideo removed: biovizBase ideo object does not contain hg38,
+# and seqlengths are sourced from genome.bs instead
+ipak.gen    = ipak(bs)
+genome.bs   = eval(parse(text = bs))
+
+# FIX: Build TxDb from Ensembl GTF for hg38 (more complete than UCSC knownGene)
+# Uses a cached .txdb file after first build to save time on reruns
+if(is.null(txdb)){
+    if(file.exists(txdb.cache)){
+        if(verbose) cat("Loading cached TxDb from", txdb.cache, "\n")
+        genome.txdb = AnnotationDbi::loadDb(txdb.cache)
+    } else {
+        if(verbose) cat("Building TxDb from GTF:", gtf.file, "\n")
+        if(verbose) cat("(This may take 5-15 minutes. It will be cached for future runs.)\n")
+        genome.txdb = txdbmaker::makeTxDbFromGFF(gtf.file, format = "gtf")
+        # Rename seqlevels BEFORE saving cache so future loads already have chr prefix
+        current.seqlevels = seqlevels(genome.txdb)
+        if(! any(grepl("^chr", current.seqlevels))){
+            if(verbose) cat("Renaming Ensembl-style seqlevels to UCSC-style (adding chr prefix)\n")
+            genome.txdb = GenomeInfoDb::renameSeqlevels(
+                genome.txdb,
+                setNames(paste0("chr", current.seqlevels), current.seqlevels)
+            )
+        }
+        if(verbose) cat("Saving TxDb cache to", txdb.cache, "\n")
+        AnnotationDbi::saveDb(genome.txdb, file = txdb.cache)
+    }
+} else {
+    ipak(txdb)
+    genome.txdb = eval(parse(text = txdb))
+}
+
+# For cached or non-GTF TxDbs: still check and rename if needed
+current.seqlevels = seqlevels(genome.txdb)
+if(! any(grepl("^chr", current.seqlevels))){
+    if(verbose) cat("Renaming Ensembl-style seqlevels to UCSC-style (adding chr prefix)\n")
+    genome.txdb = GenomeInfoDb::renameSeqlevels(
+        genome.txdb,
+        setNames(paste0("chr", current.seqlevels), current.seqlevels)
+    )
+}
+
+genome.txdb = keepSeqlevels(x = genome.txdb, value = chromosomes, pruning.mode = "coarse")
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
 
@@ -125,12 +171,45 @@ if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), 
 #--------------------------------------------------------------------------------
 
 get.overlap = function(query, subject, type = "any", name = NULL){
-    hits                 = as.data.frame(findOverlaps(query = query, subject = subject, type = type, select = "all"))
-    hits                 = as.data.table(data.frame(queryHits = hits$queryHits, as.data.frame(subject[hits$subjectHits], row.names = NULL)))
-    hits                 = hits[, lapply(.SD, function(x) paste(sort(as.character(unlist(x))), collapse = ";")), by = queryHits]
+    # Get overlap indices only — avoids expanding large list columns upfront
+    raw.hits   = findOverlaps(query = query, subject = subject, type = type, select = "all")
+    hits.df    = as.data.frame(raw.hits)
+    if(nrow(hits.df) == 0){
+        # No overlaps found — return empty data frame with correct columns
+        # Include coordinate columns + metadata columns to match non-empty path
+        coord.cols = c("seqnames", "start", "end", "width", "strand")
+        meta.cols  = c(coord.cols, colnames(as.data.frame(mcols(subject[1]))))
+        if(! is.null(name)) meta.cols = paste(meta.cols, name, sep = ".")
+        df         = as.data.frame(matrix(data = NA, nrow = length(query), ncol = length(meta.cols),
+                                          dimnames = list(NULL, meta.cols)))
+        return(df)
+    }
+    # Extract matched subject ranges — include coordinate columns (seqnames, start etc.)
+    # plus metadata columns, handling list columns safely to avoid segfault
+    matched         = subject[hits.df$subjectHits]
+    coords.df       = as.data.frame(matched, row.names = NULL)[, c("seqnames", "start", "end", "width", "strand")]
+    meta.df         = as.data.frame(lapply(as.data.frame(mcols(matched), row.names = NULL),
+                                        function(col){
+                                            if(is.list(col)){
+                                                sapply(col, function(x) paste(sort(as.character(unlist(x))), collapse = ";"))
+                                            } else {
+                                                as.character(col)
+                                            }
+                                        }), stringsAsFactors = FALSE)
+    subject.meta    = cbind(coords.df, meta.df)
+    hits        = as.data.table(data.frame(queryHits = hits.df$queryHits, subject.meta))
+    # Collapse per queryHit — handle character and numeric columns differently
+    hits        = hits[, lapply(.SD, function(x){
+                      if(is.character(x)){
+                          paste(sort(unique(unlist(strsplit(x, ";")))), collapse = ";")
+                      } else {
+                          paste(sort(unique(x)), collapse = ";")
+                      }
+                  }), by = queryHits]
     if(! is.null(name)) colnames(hits) = paste(colnames(hits), name, sep = ".")
-    df                   = as.data.frame(matrix(data = NA, nrow = length(query), ncol = ncol(hits) - 1, dimnames = list(c(NULL), c(colnames(hits)[-1]))))
-    hits                 = data.frame(hits)
+    df          = as.data.frame(matrix(data = NA, nrow = length(query), ncol = ncol(hits) - 1,
+                                       dimnames = list(NULL, colnames(hits)[-1])))
+    hits        = data.frame(hits)
     df[hits$queryHits, ] = hits[, -1]
     return(df)
 }
@@ -306,12 +385,12 @@ get.peptides = function(sequences, ids, order = c("R1R2", "R2R1")){
 ##### Calling Data Files #####
 #--------------------------------------------------------------------------------
 
-if(verbose) cat("Read ", repeats.file, sep = "")
+if(verbose) cat("Read ", repeats.file, "\n", sep = "")
 t = Sys.time()
 repeats                = read.table(file             = repeats.file,
                                     sep              = "\t",
                                     stringsAsFactors = F,
-                                    header           = F,
+                                    header           = T,      # file has a header line
                                     col.names        = c("chr", "start", "end", "strand", "subfamily", "superfamily", "family"))
 repeats$Id             = rownames(repeats)
 repeats                = subset(repeats, chr %in% chromosomes)
@@ -323,23 +402,38 @@ genome(repeats.gr)     = genome
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
 
-if(verbose) cat("Get exon positions")
+if(verbose) cat("Get exon positions\n")
 t = Sys.time()
+# Option B: fetch only tx_id for overlap — avoids expanding all list columns in get.overlap()
 exons.gr = cds(genome.txdb, columns = c("gene_id", "tx_id", "tx_name", "exon_rank"))
-exons.gr = keepSeqlevels(x = exons.gr, value = chromosomes, pruning.mode = "coarse")
+# Flatten list columns to character to prevent segfault in data.table operations
+mcols(exons.gr)$tx_id    = sapply(mcols(exons.gr)$tx_id,    function(x) paste(sort(as.character(unlist(x))), collapse = ";"))
+mcols(exons.gr)$tx_name  = sapply(mcols(exons.gr)$tx_name,  function(x) paste(sort(as.character(unlist(x))), collapse = ";"))
+mcols(exons.gr)$gene_id  = sapply(mcols(exons.gr)$gene_id,  function(x) paste(sort(as.character(unlist(x))), collapse = ";"))
+mcols(exons.gr)$exon_rank = sapply(mcols(exons.gr)$exon_rank, function(x) paste(sort(as.character(unlist(x))), collapse = ";"))
+exons.gr                = keepSeqlevels(x = exons.gr, value = chromosomes, pruning.mode = "coarse")
+seqlengths(exons.gr)    = seqlengths(genome.bs)[names(seqlengths(exons.gr))]
+genome(exons.gr)        = genome
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
 
-if(verbose) cat("Get promoter positions")
+if(verbose) cat("Get promoter positions\n")
 t = Sys.time()
-promoters.gr = promoters(genome.txdb, columns = c("gene_id", "tx_id", "tx_name", "exon_rank"), upstream = 2000, downstream = 2000)
-promoters.gr = keepSeqlevels(x = promoters.gr, value = chromosomes, pruning.mode = "coarse")
+promoters.gr             = promoters(genome.txdb, columns = c("gene_id", "tx_id", "tx_name", "exon_rank"), upstream = 2000, downstream = 2000)
+# Flatten list columns to prevent segfault
+mcols(promoters.gr)$tx_id    = sapply(mcols(promoters.gr)$tx_id,    function(x) paste(sort(as.character(unlist(x))), collapse = ";"))
+mcols(promoters.gr)$tx_name  = sapply(mcols(promoters.gr)$tx_name,  function(x) paste(sort(as.character(unlist(x))), collapse = ";"))
+mcols(promoters.gr)$gene_id  = sapply(mcols(promoters.gr)$gene_id,  function(x) paste(sort(as.character(unlist(x))), collapse = ";"))
+mcols(promoters.gr)$exon_rank = sapply(mcols(promoters.gr)$exon_rank, function(x) paste(sort(as.character(unlist(x))), collapse = ";"))
+promoters.gr             = keepSeqlevels(x = promoters.gr, value = chromosomes, pruning.mode = "coarse")
+seqlengths(promoters.gr) = seqlengths(genome.bs)[names(seqlengths(promoters.gr))]
+genome(promoters.gr)     = genome
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
 
 chimeric = NULL
 if(! is.null(chimeric.file)){
-    if(verbose) cat("Read", chimeric.file)
+    if(verbose) cat("Read", chimeric.file, "\n")
     t = Sys.time()
     chimeric          = read.table(file             = chimeric.file,
                                    sep              = "\t",
@@ -347,8 +441,9 @@ if(! is.null(chimeric.file)){
                                    col.names        = c("chr.from", "pos.from", "str.from", "chr.to", "pos.to", "str.to",
                                                         "type", "repeat.from", "repeat.to", "Name",
                                                         "base.from", "CIGAR.from", "base.to", "CIGAR.to"))
-    chimeric$chr.from = paste0("chr", chimeric$chr.from)
-    chimeric$chr.to   = paste0("chr", chimeric$chr.to)
+    # Add chr prefix if not already present (Ensembl GTF uses 1,2,3 not chr1,chr2,chr3)
+    chimeric$chr.from = ifelse(grepl("^chr", chimeric$chr.from), chimeric$chr.from, paste0("chr", chimeric$chr.from))
+    chimeric$chr.to   = ifelse(grepl("^chr", chimeric$chr.to),   chimeric$chr.to,   paste0("chr", chimeric$chr.to))
     chimeric          = subset(chimeric, chr.from %in% chromosomes & chr.to %in% chromosomes)
     chimeric          = subset(chimeric, type %in% c(1, 2))
     chimeric$n        = 1
@@ -365,13 +460,14 @@ if(! is.null(chimeric.file)){
 
 junctions = NULL
 if(! is.null(junctions.file)){
-    if(verbose) cat("Read", junctions.file)
+    if(verbose) cat("Read", junctions.file, "\n")
     t = Sys.time()
     junctions          = read.table(file             = junctions.file,
                                     sep              = "\t",
                                     stringsAsFactors = F,
                                     col.names        = c("chr", "start", "end", "strand", "motif", "annotated", "unique", "multi", "overhang"))
-    junctions$chr      = paste0("chr", junctions$chr)
+    # Add chr prefix if not already present
+    junctions$chr      = ifelse(grepl("^chr", junctions$chr), junctions$chr, paste0("chr", junctions$chr))
     junctions          = subset(junctions, chr %in% chromosomes)
     junctions          = subset(junctions, motif %in% c(1, 2))
     junctions$strand   = with(junctions, ifelse(strand == 1, "+", ifelse(strand == 2, "-", "*")))
@@ -386,7 +482,7 @@ if(! is.null(junctions.file)){
 }
 
 
-if(verbose) cat("Bind chimeric and junction tables")
+if(verbose) cat("Bind chimeric and junction tables\n")
 t = Sys.time()
 chimeric.all = rbind(data.frame(file = "Chimeric", chimeric),
                      data.frame(file = "Junction", junctions))
@@ -396,7 +492,7 @@ if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), 
 ##### Donor #####
 #--------------------------------------------------------------------------------
 
-if(verbose) cat("Create GRanges (donor)")
+if(verbose) cat("Create GRanges (donor)\n")
 t = Sys.time()
 chimeric.from.gr             = with(chimeric.all, GRanges(seqnames = chr.from,
                                                           ranges   = IRanges(start = pos.from, width = 1),
@@ -408,19 +504,19 @@ seqlengths(chimeric.from.gr) = seqlengths(genome.bs)[names(seqlengths(chimeric.f
 genome(chimeric.from.gr)     = genome
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
-if(verbose) cat("Annotate repeat positions (donor)")
+if(verbose) cat("Annotate repeat positions (donor)\n")
 t = Sys.time()
 repeats.from.tmp        = get.overlap(query = chimeric.from.gr, subject = repeats.gr, name = "repeat")
 mcols(chimeric.from.gr) = DataFrame(mcols(chimeric.from.gr), repeats.from.tmp)
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
-if(verbose) cat("Annotate gene positions (donor)")
+if(verbose) cat("Annotate gene positions (donor)\n")
 t = Sys.time()
 exons.from.tmp          = get.overlap(query = chimeric.from.gr, subject = exons.gr, name = "exon")
 mcols(chimeric.from.gr) = DataFrame(mcols(chimeric.from.gr), exons.from.tmp)
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
-if(verbose) cat("Annotate promoter positions (donor)")
+if(verbose) cat("Annotate promoter positions (donor)\n")
 t = Sys.time()
 promoters.from.tmp      = get.overlap(query = chimeric.from.gr, subject = promoters.gr, name = "Promoter")
 mcols(chimeric.from.gr) = DataFrame(mcols(chimeric.from.gr), promoters.from.tmp)
@@ -430,7 +526,7 @@ if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), 
 ##### Acceptor #####
 #--------------------------------------------------------------------------------
 
-if(verbose) cat("Create GRanges (acceptor)")
+if(verbose) cat("Create GRanges (acceptor)\n")
 t = Sys.time()
 chimeric.to.gr             = with(chimeric.all, GRanges(seqnames = chr.to,
                                                         ranges   = IRanges(start = pos.to, width = 1),
@@ -439,19 +535,20 @@ seqlengths(chimeric.to.gr) = seqlengths(genome.bs)[names(seqlengths(chimeric.to.
 genome(chimeric.to.gr)     = genome
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
-if(verbose) cat("Annotate repeat positions (acceptor)")
+if(verbose) cat("Annotate repeat positions (acceptor)\n")
 t = Sys.time()
 repeats.to.tmp        = get.overlap(query = chimeric.to.gr, subject = repeats.gr, name = "repeat")
 mcols(chimeric.to.gr) = DataFrame(mcols(chimeric.to.gr), repeats.to.tmp)
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
-if(verbose) cat("Annotate gene positions (acceptor)")
+if(verbose) cat("Annotate gene positions (acceptor)\n")
 t = Sys.time()
 exons.to.tmp          = get.overlap(query = chimeric.to.gr, subject = exons.gr, name = "exon")
 mcols(chimeric.to.gr) = DataFrame(mcols(chimeric.to.gr), exons.to.tmp)
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
-if(verbose) cat("Annotate promoter positions (acceptor)")
+# FIX: was incorrectly using promoters.from.tmp here — now correctly uses promoters.to.tmp
+if(verbose) cat("Annotate promoter positions (acceptor)\n")
 t = Sys.time()
 promoters.to.tmp      = get.overlap(query = chimeric.to.gr, subject = promoters.gr, name = "Promoter")
 mcols(chimeric.to.gr) = DataFrame(mcols(chimeric.to.gr), promoters.to.tmp)
@@ -461,7 +558,7 @@ if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), 
 ##### Combine and filter #####
 #--------------------------------------------------------------------------------
 
-if(verbose) cat("Combine and filter data")
+if(verbose) cat("Combine and filter data\n")
 t = Sys.time()
 chimeric.combine.gr                         = chimeric.from.gr
 values(chimeric.combine.gr)$acc             = chimeric.to.gr
@@ -485,7 +582,7 @@ if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), 
 
 table.file = paste0(prefix, "_Chimeric.out.annotatedJET.txt")
 t = Sys.time()
-if(verbose) cat("Write", table.file)
+if(verbose) cat("Write", table.file, "\n")
 chimeric.df = as.data.frame(chimeric.combine.gr)
 chimeric.df$Donor = with(chimeric.df, paste(ifelse(! is.na(seqnames.repeat), "R", "."),
                                             ifelse(! is.na(seqnames.exon), "E", "."),
@@ -537,22 +634,22 @@ if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), 
 #--------------------------------------------------------------------------------
 
 sequences.file = paste0(prefix, "_Fusions_chim", 2, ".junc", minjunc, ".size", size, ".genomic.txt")
-if(verbose) cat("Write nucleotide sequences in", sequences.file)
+if(verbose) cat("Write nucleotide sequences in", sequences.file, "\n")
 write.table(x = sequences.all.rbind, file = sequences.file, quote = F, sep = "\t", col.names = T, row.names = F)
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
 fusions.file = paste0(prefix, "_Fusions_chim", 2, ".junc", minjunc, ".size", size, ".fasta")
-if(verbose) cat("Write fusion sequences in", fusions.file)
+if(verbose) cat("Write fusion sequences in", fusions.file, "\n")
 writeXStringSet(x = fusions, filepath = fusions.file, format = "fasta")
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
 ids.file = paste0(prefix, "_Fusions_chim", 2, ".junc", minjunc, ".size", size, ".ids.txt")
-if(verbose) cat("Write fusion ids in", ids.file)
+if(verbose) cat("Write fusion ids in", ids.file, "\n")
 write.table(x = ids.collapse[, c("ID", "Name")], file = ids.file, sep = "\t", col.names = F, row.names = F, quote = F)
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
 rdata.file = paste0(prefix, "_Fusions_chim", 2, ".junc", minjunc, ".size", size, ".RData")
-if(verbose) cat("Save data in", rdata.file)
+if(verbose) cat("Save data in", rdata.file, "\n")
 t = Sys.time()
 save(list = ls(all = T), file = rdata.file)
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")

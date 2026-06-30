@@ -14,7 +14,6 @@ RprojectDir=/opt/R/4.5.3/bin
 day=`date +"%Y%m%d"`
 time=`date +"%Hh%Mm%Ss"`
 date="${day}_${time}"
-readLength=100
 organism="Human"
 genome="GRCh38"
 database="ensembl"
@@ -22,9 +21,6 @@ database="ensembl"
 ##### Directory paths
 outputsDir=/home/faramir/data/neondisco-jet/outputData
 logDir=/home/faramir/data/neondisco-jet/logDir
-infoDir=/home/faramir/data/neondisco-jet/infoDir
-starIndexesDir=/home/faramir/data/neondisco-jet/starIndexesDir
-metadataDir=/home/faramir/data/neondisco-jet/metadataDir
 ErrorDir=/home/faramir/data/neondisco-jet/ErrorDir
 
 mkdir -p ${logDir}
@@ -36,7 +32,7 @@ RscriptDir=/home/faramir/repos/neondisco-jet/JET_identification_pipeline
 infoFile=/home/faramir/repos/neondisco-jet/infoDir/samples.txt
 
 ##### Log file
-logFile="${logDir}/R_netMHCpan_run_${date}.log"
+logFile="${logDir}/R_JET_run_${date}.log"
 touch ${logFile}
 
 
@@ -44,67 +40,93 @@ touch ${logFile}
 ##-- STEP 2: Identification and classification of junctions, selection of JETs
 #-------------------------------------------------------
 
-echo -e "Starting R -----" >> ${logFile}
+echo -e "Starting Step 2 -----" >> ${logFile}
+echo -e "Date: ${date}" >> ${logFile}
 
-# metadata columns: R1 path, R2 path, sample name
-while read fastqR1Filegz fastqR2Filegz name day
+# metadata columns: R1 path, R2 path, sample name (3 columns — no date)
+while read fastqR1Filegz fastqR2Filegz name
 do
     echo -e "\e[1m${name}\e[0m" >> ${logFile}
 
     ############################################################################
-    ##### Sample-specific output directory
+    ##### Find sample-specific output directory from Step 1 automatically
 
-    outputSampleDir="${outputsDir}/${name}_${day}"
-    mkdir -p ${outputSampleDir}
+    outputSampleDir=$(ls -td ${outputsDir}/${name}_* 2>/dev/null | head -1)
 
-    echo -e "\e[1m${name}\t Creating output files\e[0m" >> ${logFile}
+    if [ -z "${outputSampleDir}" ]; then
+        echo "Error: No output directory found for sample ${name} in ${outputsDir}" | tee -a ${logFile}
+        echo "       Make sure Step 1 has been run before Step 2."
+        continue
+    fi
+
+    echo -e "\e[1m${name}\t Found output directory: ${outputSampleDir}\e[0m" >> ${logFile}
 
     ############################################################################
     ##### Calling sample-specific data files (outputs from Step 1)
 
     prefix="${outputSampleDir}/${name}"
 
-    samFile="${prefix}_Chimeric.out.sam"
-    bamFile="${prefix}_Aligned.sortedByCoord.out.bam"
-    bamChimericFile="${prefix}_Chimeric.out.bam"
-    bamChimericSortFile="${prefix}_Chimeric.out.sort.bam"
     chimericFile="${prefix}_Chimeric.out.junction"
     junctionFile="${prefix}_SJ.out.tab"
-
     logFinalOut="${prefix}_Log.final.out"
-    libsize="$(grep "Uniquely mapped reads number" ${logFinalOut} | sed -r 's/[\\t]+//g' | cut -d '|' -f2)"
 
-    echo -e "\e[1m${name}\t Calling and naming output files:\e[0m" >> ${logFile}
-    echo -e "\e[1m${name}\t\t ${prefix}\e[0m" >> ${logFile}
-    echo -e "\e[1m${name}\t\t ${libsize}\e[0m" >> ${logFile}
+    # Validate input files exist
+    if [ ! -f "${chimericFile}" ]; then
+        echo "Error: Chimeric junction file not found: ${chimericFile}" | tee -a ${logFile}
+        continue
+    fi
 
-    size=11
+    if [ ! -f "${junctionFile}" ]; then
+        echo "Error: SJ junction file not found: ${junctionFile}" | tee -a ${logFile}
+        continue
+    fi
+
+    if [ ! -f "${logFinalOut}" ]; then
+        echo "Error: STAR log file not found: ${logFinalOut}" | tee -a ${logFile}
+        continue
+    fi
+
+    # Extract library size from STAR log
+    libsize="$(grep "Uniquely mapped reads number" ${logFinalOut} | sed -r 's/[[:space:]]+//g' | cut -d '|' -f2)"
+
+    if [ -z "${libsize}" ]; then
+        echo "Error: Could not extract libsize from ${logFinalOut}" | tee -a ${logFile}
+        continue
+    fi
+
+    echo -e "\e[1m${name}\t Output prefix: ${prefix}\e[0m" >> ${logFile}
+    echo -e "\e[1m${name}\t Library size: ${libsize}\e[0m" >> ${logFile}
 
     ############################################################################
-    ##### Naming sample-specific output files
+    ##### Run R analysis for peptide sizes 8, 9, 10, 11
 
-    fastaFile="${prefix}_Fusions.annotatedchimJunc2e7.size${size}.fasta"
-    idsFile="${prefix}_Fusions.annotatedchimJunc2e7.size${size}.ids.txt"
-    netmhcpanFile4="${prefix}_Fusions.annotatedchimJunc2e7.size${size}.netmhcpan4.0.txt"
+    for size in `seq 8 11`
+    do
+        echo -e "\e[1m${name}\t Running R analysis for size ${size}\e[0m" >> ${logFile}
 
-    ############################################################################
-    ##### R analysis
+        cmd="${RprojectDir}/Rscript ${RscriptDir}/Copy_JET_analysis_filtered.R \
+            --chimeric ${chimericFile} \
+            --junction ${junctionFile} \
+            --genome ${genome} \
+            --size ${size} \
+            --libsize ${libsize} \
+            --prefix ${prefix} \
+            --verbose"
 
-    cmd="${RprojectDir}/Rscript ${RscriptDir}/Copy_JET_analysis_filtered.R \
-        --chimeric ${chimericFile} \
-        --junction ${junctionFile} \
-        --genome ${genome} \
-        --size ${size} \
-        --libsize ${libsize} \
-        --prefix ${prefix} \
-        --verbose"
+        echo ${cmd}
+        eval "${cmd}"
 
-    echo ${cmd}
-    eval "${cmd}"
+        if [ $? -eq 0 ]; then
+            echo -e "${name}\tsize=${size}\tR_analysis: SUCCESS" >> ${logFile}
+        else
+            echo -e "${name}\tsize=${size}\tR_analysis: FAILED" >> ${logFile}
+        fi
 
-    date=`date +"%Y%m%d_%Hh%Mm%Ss"`
-    echo -e "${name}\tR_analysis:\t${cmd}\t${date}" >> ${logFile}
+        date_done=`date +"%Y%m%d_%Hh%Mm%Ss"`
+        echo -e "${name}\tR_analysis\tsize=${size}\t${date_done}" >> ${logFile}
 
-done < ${infoFile}
+    done  # end size loop
+
+done < ${infoFile}  # end sample loop
 
 echo -e "END" >> ${logFile}

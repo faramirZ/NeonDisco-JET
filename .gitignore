@@ -49,3 +49,9 @@ metadataDir/*
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+#dependency files
+netMHCpan-4.2/*
+dependancies/*
+dependencies/netMHCpan-4.2cstatic.Linux.tar
+dependencies/
