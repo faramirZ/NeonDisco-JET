@@ -20,7 +20,21 @@ trap 'rm -rf "${TMP_DIR_LOCAL}"' EXIT
 
 log_step "STEP 4 — Aggregating binders: ${SAMPLE_NAME}"
 
+# Pre-check outside the subshell — FOUND_ANY set inside a pipe block
+# runs in a subshell and cannot propagate back to the parent shell,
+# so we check file existence here before entering the pipe.
 FOUND_ANY=false
+for SIZE in 8 9 10 11; do
+    NETFILE="${PREFIX}_Fusions_chim2.junc2.size${SIZE}.netmhcpan4.txt"
+    IDSFILE="${PREFIX}_Fusions_chim2.junc2.size${SIZE}.ids.txt"
+    if [ -f "${NETFILE}" ] && [ -f "${IDSFILE}" ]; then
+        FOUND_ANY=true
+        break
+    fi
+done
+[ "${FOUND_ANY}" = true ] || die "No netMHCpan output files found for ${SAMPLE_NAME}"
+
+# Build the combined binder table across sizes 8-11
 {
 echo -e "Size\tID\tPeptide\tMinRank\tNB\tJunction"
 
@@ -28,7 +42,6 @@ for SIZE in 8 9 10 11; do
     NETFILE="${PREFIX}_Fusions_chim2.junc2.size${SIZE}.netmhcpan4.txt"
     IDSFILE="${PREFIX}_Fusions_chim2.junc2.size${SIZE}.ids.txt"
     [ -f "${NETFILE}" ] && [ -f "${IDSFILE}" ] || { log_warn "Skipping size ${SIZE}: missing netMHCpan or ids file"; continue; }
-    FOUND_ANY=true
 
     awk -F'\t' '{
         n=split($2, combos, "/")
@@ -58,8 +71,6 @@ for SIZE in 8 9 10 11; do
     }' "${NETFILE}"
 done
 } | awk -F'\t' 'NR==1{print;next} !seen[$2"\t"$3]++' > "${RESULT_FILE}"
-
-[ "${FOUND_ANY}" = true ] || die "No netMHCpan output files found for ${SAMPLE_NAME}"
 
 TOTAL=$(tail -n +2 "${RESULT_FILE}" | wc -l)
 STRONG=$(tail -n +2 "${RESULT_FILE}" | awk -F'\t' '$4<0.5' | wc -l)
