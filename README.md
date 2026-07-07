@@ -65,8 +65,9 @@ RNA-seq FASTQ
       ▼
 ┌─────────────────────────────────────────────┐
 │  STEP 1 — STAR 2-pass Alignment             │
-│  Identifies chimeric reads spanning         │
-│  exon-TE boundaries                         │
+│  Auto-builds genome index if not found;     │
+│  identifies chimeric reads spanning         │
+│  exon-TE boundaries; sorts and indexes BAMs │
 └────────────────────┬────────────────────────┘
                      │  Chimeric.out.junction
                      │  SJ.out.tab
@@ -242,17 +243,26 @@ mv <sample>.repeatmasker_reformat.txt ~/repos/neondisco-jet/metadataDir/
 
 ### 5.4 STAR Genome Index
 
-Build the genome index once before your first run. This takes approximately 30–40 minutes and requires ~30 GB of RAM:
+**You do not need to build the index manually.** `step1_alignment.sh` checks for the index automatically at the start of every run:
+
+- If the index **does not exist** → it builds it automatically before alignment. The index directory is also created automatically via `mkdir -p`. This takes approximately 30–40 minutes and requires ~30 GB of RAM on the first run only.
+- If the index **already exists** (detected by the presence of `genomeParameters.txt` inside `--star-index`) → it skips the build entirely and proceeds straight to alignment.
+
+All you need to do is pass the desired index directory path via `--star-index` when running the pipeline. The same path is reused for all subsequent samples — the index only ever builds once per genome.
 
 ```bash
-mkdir -p ~/data/neondisco-jet/starIndexesDir
+# Example: first run on a fresh server — index will be built automatically
+./run_JET_pipeline.sh \
+    --star-index /home/faramir/data/neondisco-jet/starIndexesDir \
+    ...
 
-STAR --runMode genomeGenerate \
-     --genomeDir ~/data/neondisco-jet/starIndexesDir \
-     --genomeFastaFiles ~/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.dna.primary_assembly.fa \
-     --sjdbGTFfile ~/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.115.gtf \
-     --runThreadN 16
+# Subsequent runs — index already exists, build is skipped automatically
+./run_JET_pipeline.sh \
+    --star-index /home/faramir/data/neondisco-jet/starIndexesDir \
+    ...
 ```
+
+> **Note:** The index is genome-level and shared across all samples. On a shared server, coordinate with other users before triggering a rebuild to avoid duplicate index builds consuming disk and RAM simultaneously.
 
 ---
 
@@ -306,7 +316,6 @@ Create all required directories before the first run:
 ```bash
 # Output and working directories
 mkdir -p ~/data/neondisco-jet/outputData
-mkdir -p ~/data/neondisco-jet/starIndexesDir
 mkdir -p ~/data/neondisco-jet/logDir
 mkdir -p ~/data/neondisco-jet/tmpData
 mkdir -p ~/data/neondisco-jet/ErrorDir
@@ -317,6 +326,15 @@ mkdir -p ~/repos/neondisco-jet/inputData
 mkdir -p ~/repos/neondisco-jet/infoDir
 mkdir -p ~/repos/neondisco-jet/dependencies
 ```
+
+> **Directories created automatically by the pipeline (do not need to be created manually):**
+>
+> | Directory | Created by | When |
+> |---|---|---|
+> | `starIndexesDir/` | `step1_alignment.sh` | Before genome indexing on first run |
+> | `outputData/<sample>_<date>/` | `step1_alignment.sh` | At the start of each sample run |
+> | `outputData/logs/` | `run_JET_pipeline.sh` | At pipeline startup |
+> | `tmpData/STAR_<sample>_<date>/` | `step1_alignment.sh` | During STAR alignment |
 
 ---
 
@@ -451,7 +469,7 @@ To rerun only the binder aggregation (e.g. after changing thresholds):
 | `--genome BUILD` | | `hg38` | Genome build: `hg19`, `hg38`, `mm9`, `mm10` |
 | `--genome-fasta PATH` | ✅ (Step 1) | — | Genome FASTA file |
 | `--gtf PATH` | ✅ (Steps 1–2) | — | Gene annotation GTF |
-| `--star-index DIR` | ✅ (Step 1) | — | Pre-built STAR genome index |
+| `--star-index DIR` | ✅ (Step 1) | — | STAR genome index directory — built automatically on first run if missing |
 | `--star-bin DIR` | ✅ (Step 1) | — | Directory containing `STAR` binary |
 | `--samtools-bin DIR` | ✅ (Step 1) | — | Directory containing `samtools` binary |
 | `--rscript-bin PATH` | ✅ (Step 2) | — | Path to `Rscript` binary |
@@ -578,8 +596,11 @@ This script:
 
 ## 13. Troubleshooting
 
-**STAR fails with "genome not found"**
-→ Check that `--star-index` points to a completed genome index (should contain `genomeParameters.txt`).
+**STAR alignment fails with "genome not found" or "genomeParameters.txt missing"**
+→ The index build may have failed or been interrupted. Delete the `starIndexesDir` folder and re-run the pipeline — `step1_alignment.sh` will detect the missing `genomeParameters.txt` and rebuild the index automatically. Make sure `--genome-fasta` and `--gtf` paths are correct and the files are not corrupted.
+
+**STAR index is rebuilding on every run**
+→ Check that `--star-index` points to the same directory each run and that `genomeParameters.txt` is present inside it after a successful build. If the path differs between runs the check will always trigger a rebuild.
 
 **R script fails: `error: unable to find an inherited method for function 'seqinfo' for signature 'x = "NULL"'`**
 → The `ideo[["hg38"]]` lookup failed. The R script should use `ideo[["hg19"]]` for the ideogram object — check lines around `genome.ideo` in `JET_analysis_filtered.R`.

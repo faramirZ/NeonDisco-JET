@@ -50,6 +50,19 @@ log_info "R1: ${R1}"
 log_info "R2: ${R2}"
 log_info "Output prefix: ${PREFIX}"
 
+if [ ! -f "${STAR_INDEX_DIR}/genomeParameters.txt" ]; then
+    log_info "STAR index not found — building genome index (this takes ~40 min)..."
+    mkdir -p "${STAR_INDEX_DIR}"          # ADD THIS LINE
+    run_cmd "STAR genome indexing" \
+        "${STAR_BIN}/STAR" \
+            --runMode genomeGenerate \
+            --genomeDir "${STAR_INDEX_DIR}" \
+            --genomeFastaFiles "${GENOME_FASTA}" \
+            --sjdbGTFfile "${GTF_FILE}" \
+            --runThreadN "${THREADS}"
+    log_ok "Genome index built successfully"
+fi
+
 run_cmd "STAR alignment (${SAMPLE_NAME})" \
     "${STAR_BIN}/STAR" \
         --quantMode GeneCounts \
