@@ -580,7 +580,18 @@ To verify that a new run produces results consistent with a reference run, use t
 
 ```bash
 cd ~/repos/neondisco-jet/JET_identification_pipeline
-./check_integrity.sh
+
+# Basic — sample name auto-derived from directory name
+./check_integrity.sh -o 379T_20260701 -n 379T_20260715
+
+# Explicit sample name
+./check_integrity.sh -o 379T_20260701 -n 379T_20260715 -s 379T
+
+# Different outputs base directory
+./check_integrity.sh -o 379T_20260701 -n 379T_20260715 -d /mnt/data/neondisco-jet/outputData
+
+# Show help
+./check_integrity.sh -h
 ```
 
 This script:
