@@ -163,7 +163,7 @@ while [ "$#" -gt 0 ]; do
         --skip-step3)     SKIP_STEP3=true; shift ;;
         --skip-step4)     SKIP_STEP4=true; shift ;;
         -h|--help)        usage ;;
-        *) log_error "Unknown argument: $1"; usage ;;
+        *) echo "ERROR: Unknown argument: $1"; usage ;;
     esac
 done
 
@@ -238,7 +238,7 @@ log_info "═══════════════════════�
 log_step "PRE-FLIGHT: VALIDATING SAMPLES FILE"
 
 N_SAMPLES=0
-while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS; do
+while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS || [ -n "${NAME}" ]; do
     [ -z "${NAME}" ] && continue
     [[ "${NAME}" =~ ^#.* ]] && continue
     N_SAMPLES=$((N_SAMPLES+1))

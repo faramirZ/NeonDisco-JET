@@ -16,6 +16,7 @@ REPEATS_FILE=$3
 : "${RSCRIPT_BIN:?RSCRIPT_BIN not set}"
 : "${R_SCRIPT:?R_SCRIPT not set}"
 : "${GENOME:?GENOME not set}"
+: "${GTF_FILE:?GTF_FILE not set}"
 
 require_dir  "${OUT_SAMPLE_DIR}" "Step 1 output directory"
 require_file "${R_SCRIPT}" "R script"

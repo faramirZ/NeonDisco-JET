@@ -421,7 +421,7 @@ cd ~/repos/neondisco-jet/JET_identification_pipeline
     --samtools-bin /home/faramir/repos/neondisco-jet/.pixi/envs/default/bin \
     --rscript-bin /opt/R/4.5.3/bin/Rscript \
     --r-script /home/faramir/repos/neondisco-jet/JET_identification_pipeline/JET_analysis_filtered.R \
-    --netmhcpan-bin /home/faramir/repos/neondisco-jet/dependencies/netMHCpan-4.2/Linux_x86_64/bin \
+    --netmhcpan-bin /home/faramir/repos/neondisco-jet/dependencies/netMHCpan-4.2 \
     --outputs-dir /home/faramir/data/neondisco-jet/outputData \
     --tmp-dir /home/faramir/data/neondisco-jet/tmpData \
     --threads 16

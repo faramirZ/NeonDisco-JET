@@ -27,7 +27,6 @@ R2_GZ=$3
 
 require_file "${R1_GZ}" "R1 fastq"
 require_file "${R2_GZ}" "R2 fastq"
-require_dir  "${STAR_INDEX_DIR}" "STAR index directory"
 require_file "${STAR_BIN}/STAR" "STAR binary"
 
 DAY=$(date +"%Y%m%d")
@@ -52,7 +51,7 @@ log_info "Output prefix: ${PREFIX}"
 
 if [ ! -f "${STAR_INDEX_DIR}/genomeParameters.txt" ]; then
     log_info "STAR index not found — building genome index (this takes ~40 min)..."
-    mkdir -p "${STAR_INDEX_DIR}"          # ADD THIS LINE
+    mkdir -p "${STAR_INDEX_DIR}"
     run_cmd "STAR genome indexing" \
         "${STAR_BIN}/STAR" \
             --runMode genomeGenerate \
