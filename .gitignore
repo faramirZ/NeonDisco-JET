@@ -49,6 +49,7 @@ renv.lock
 *.out
 Log.out
 metadataDir/*
+!metadataDir/metadata.txt
 
 # pixi environments
 .pixi/*
@@ -58,6 +59,7 @@ metadataDir/*
 dependencies/netMHCpan-4.2/*
 dependencies/netMHCpan-4.2cstatic.Linux.tar
 dependencies/netMHCpan-4.2_license.txt
+!dependencies/netMHCpan-4.2/netMHCpan-4.2.txt
 
 # Other
 Log.out
