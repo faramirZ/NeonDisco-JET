@@ -55,7 +55,7 @@ metadataDir/*
 !.pixi/config.toml
 
 #dependency files
-netMHCpan-4.2/*
+dependencies/netMHCpan-4.2/*
 dependencies/netMHCpan-4.2cstatic.Linux.tar
 dependencies/netMHCpan-4.2_license.txt
 
