@@ -37,6 +37,10 @@ ENV/
 # Jupyter
 .ipynb_checkpoints/
 
+# R
+.Rprofile
+renv.lock
+
 # Large files
 *.zip
 *.tar.gz
@@ -54,4 +58,12 @@ metadataDir/*
 netMHCpan-4.2/*
 dependancies/*
 dependencies/netMHCpan-4.2cstatic.Linux.tar
-dependencies/
+dependencies/netMHCpan-4.2_license.txt
+
+# Other
+Log.out
+
+#infoDir
+infoDir/ER+samples.tsv
+infoDir/missing.tsv
+infoDir/samples.tsv

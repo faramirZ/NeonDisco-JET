@@ -34,19 +34,21 @@ OUT_SAMPLE_DIR="${OUTPUTS_DIR}/${SAMPLE_NAME}_${DAY}"
 mkdir -p "${OUT_SAMPLE_DIR}"
 PREFIX="${OUT_SAMPLE_DIR}/${SAMPLE_NAME}"
 
-R1=${R1_GZ%.gz}
-R2=${R2_GZ%.gz}
-[ -f "${R1}" ] || gunzip -k -c "${R1_GZ}" > "${R1}"
-[ -f "${R2}" ] || gunzip -k -c "${R2_GZ}" > "${R2}"
+# Use array to safely pass optional --readFilesCommand
+# Avoids disk usage from decompressing gz files
+READ_FILES_ARGS=()
+if [[ "${R1_GZ}" == *.gz ]]; then
+    READ_FILES_ARGS=(--readFilesCommand zcat)
+    log_info "Input format: gzip — STAR will read via zcat (no decompression to disk)"
+else
+    log_info "Input format: plain fastq — STAR will read directly"
+fi
 
-SAM_FILE="${PREFIX}_Chimeric.out.sam"
 BAM_FILE="${PREFIX}_Aligned.sortedByCoord.out.bam"
-CHIM_BAM="${PREFIX}_Chimeric.out.bam"
-CHIM_SORT_BAM="${PREFIX}_Chimeric.out.sort.bam"
 
 log_step "STEP 1 — STAR alignment: ${SAMPLE_NAME}"
-log_info "R1: ${R1}"
-log_info "R2: ${R2}"
+log_info "R1: ${R1_GZ}"
+log_info "R2: ${R2_GZ}"
 log_info "Output prefix: ${PREFIX}"
 
 if [ ! -f "${STAR_INDEX_DIR}/genomeParameters.txt" ]; then
@@ -70,10 +72,10 @@ run_cmd "STAR alignment (${SAMPLE_NAME})" \
         --genomeDir "${STAR_INDEX_DIR}" \
         --sjdbGTFfile "${GTF_FILE}" \
         --sjdbOverhang "${READ_LENGTH}" \
-        --readFilesIn "${R1}" "${R2}" \
+        --readFilesIn "${R1_GZ}" "${R2_GZ}" \
+        "${READ_FILES_ARGS[@]}" \
         --outFileNamePrefix "${PREFIX}_" \
         --outTmpDir "${TMP_DIR}/STAR_${SAMPLE_NAME}_${DAY}_$$" \
-        --outReadsUnmapped Fastx \
         --outSAMtype BAM SortedByCoordinate \
         --bamRemoveDuplicatesType UniqueIdentical \
         --outFilterMismatchNoverLmax 0.04 \
@@ -84,12 +86,7 @@ run_cmd "STAR alignment (${SAMPLE_NAME})" \
         --chimSegmentMin 10 \
         --chimJunctionOverhangMin 10
 
-run_cmd "samtools view (chimeric)" \
-    bash -c "'${SAMTOOLS_BIN}/samtools' view -@ '${THREADS}' -b '${SAM_FILE}' > '${CHIM_BAM}'"
-run_cmd "samtools sort (chimeric)" \
-    "${SAMTOOLS_BIN}/samtools" sort -@ "${THREADS}" -o "${CHIM_SORT_BAM}" -O bam "${CHIM_BAM}"
-run_cmd "samtools index (chimeric)" "${SAMTOOLS_BIN}/samtools" index "${CHIM_SORT_BAM}"
-run_cmd "samtools index (aligned)"  "${SAMTOOLS_BIN}/samtools" index "${BAM_FILE}"
+run_cmd "samtools index (aligned)" "${SAMTOOLS_BIN}/samtools" index "${BAM_FILE}"
 
 log_ok "Step 1 complete for ${SAMPLE_NAME}. Output dir: ${OUT_SAMPLE_DIR}"
-echo "${OUT_SAMPLE_DIR}"   # printed last on stdout so the caller can capture it
+echo "${OUT_SAMPLE_DIR}"

@@ -55,16 +55,31 @@ for SIZE in 8 9 10 11; do
         print $1"\t"out
     }' "${IDSFILE}" > "${TMP_DIR_LOCAL}/lookup_size${SIZE}.tsv"
 
-    awk -F'\t' -v sz="${SIZE}" -v lookup="${TMP_DIR_LOCAL}/lookup_size${SIZE}.tsv" '
-    BEGIN{ while((getline line < lookup) > 0){ split(line,a,"\t"); junc[a[1]]=a[2] } }
+    # Detect number of alleles from netMHCpan header line (line 3)
+    # Column layout: Pos(1) Peptide(2) ID(3) [core icore EL_score EL_rank]*N Ave NB
+    # Total cols = 4*N + 5  →  N = (NF - 5) / 4
+    # Rank column for allele i = 3 + 4*i  (e.g. allele1=col7, allele2=col11, ...)
+    N_ALLELES=$(awk -F'\t' 'NR==3{ print int((NF-5)/4); exit }' "${NETFILE}")
+
+    # Log allele count and rank column positions for this size file
+    log_info "  [size=${SIZE}] Detected ${N_ALLELES} allele(s) in netMHCpan output"
+    RANK_COL_INFO=""
+    for (( i=1; i<=N_ALLELES; i++ )); do
+        COL=$(( 3 + 4*i ))
+        RANK_COL_INFO="${RANK_COL_INFO} allele${i}→col${COL}"
+    done
+    log_info "  [size=${SIZE}] Rank columns:${RANK_COL_INFO}"
+
+    awk -F'\t' -v sz="${SIZE}" -v n_alleles="${N_ALLELES}" -v lookup="${TMP_DIR_LOCAL}/lookup_size${SIZE}.tsv" '
+    BEGIN{
+        while((getline line < lookup) > 0){ split(line,a,"\t"); junc[a[1]]=a[2] }
+        for (i=1; i<=n_alleles; i++) rank_col[i] = 3 + 4*i
+    }
     NR>3 {
-        minrank=$7
-        if($11<minrank) minrank=$11
-        if($15<minrank) minrank=$15
-        if($19<minrank) minrank=$19
-        if($23<minrank) minrank=$23
-        if($27<minrank) minrank=$27
-        if(minrank<2){
+        minrank = $(rank_col[1])
+        for (i=2; i<=n_alleles; i++)
+            if ($(rank_col[i]) < minrank) minrank = $(rank_col[i])
+        if (minrank < 2) {
             j = ($3 in junc) ? junc[$3] : "NA"
             printf "%s\t%s\t%s\t%.4f\t%s\t%s\n", sz, $3, $2, minrank, $NF, j
         }

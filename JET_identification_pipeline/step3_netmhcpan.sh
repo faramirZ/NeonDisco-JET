@@ -22,8 +22,73 @@ echo "${HLA_ALLELES}" | grep -qE "HLA-[ABC]" || die "HLA_ALLELES malformed: ${HL
 PREFIX="${OUT_SAMPLE_DIR}/${SAMPLE_NAME}"
 
 log_step "STEP 3 — netMHCpan: ${SAMPLE_NAME}"
-log_info "HLA alleles: ${HLA_ALLELES}"
+log_info "HLA alleles provided : ${HLA_ALLELES}"
 
+# =============================================================================
+#  VALIDATE HLA ALLELES AGAINST netMHCpan LIBRARY
+#  Runs -listMHC once, checks each allele, drops any not found
+# =============================================================================
+log_info "Querying netMHCpan library for supported alleles..."
+
+# Declare with safe default first to avoid set -u unbound errors.
+# Capture both stdout and stderr since netMHCpan -listMHC may exit non-zero
+# even on success — || true prevents set -e from killing the script.
+MHC_LIST=""
+MHC_LIST=$(cd "${NETMHCPAN_BIN}" && ./netMHCpan -listMHC 2>&1 | grep -E "^HLA-|^H-2") || true
+
+if [ -z "${MHC_LIST}" ]; then
+    die "netMHCpan -listMHC returned no alleles — check that ${NETMHCPAN_BIN}/netMHCpan can find its data files"
+fi
+
+MHC_LIST_COUNT=$(echo "${MHC_LIST}" | wc -l)
+log_info "netMHCpan library loaded: ${MHC_LIST_COUNT} alleles available"
+
+# Declare arrays with safe defaults before the loop
+VALID_ALLELES=()
+DROPPED_ALLELES=()
+
+IFS=',' read -ra ALLELE_ARRAY <<< "${HLA_ALLELES}"
+for ALLELE in "${ALLELE_ARRAY[@]}"; do
+    # Strip all whitespace variants including carriage returns
+    ALLELE=$(echo "${ALLELE}" | tr -d ' \t\r\n')
+    [ -z "${ALLELE}" ] && continue
+
+    # Use awk exact line matching — more reliable than grep -xF
+    if echo "${MHC_LIST}" | awk -v a="${ALLELE}" '$0==a{found=1} END{exit (found!=1)}' 2>/dev/null; then
+        VALID_ALLELES+=("${ALLELE}")
+        log_ok  "  ✔  Found in library   : ${ALLELE}"
+    else
+        DROPPED_ALLELES+=("${ALLELE}")
+        log_warn "  ✘  Not in library, dropping: ${ALLELE}"
+    fi
+done
+
+# -- Summary of validation
+echo ""
+log_info "── HLA Allele Validation Summary for ${SAMPLE_NAME} ──"
+log_info "  Provided  : ${#ALLELE_ARRAY[@]} allele(s)"
+log_info "  Valid     : ${#VALID_ALLELES[@]} allele(s)"
+log_info "  Dropped   : ${#DROPPED_ALLELES[@]} allele(s)"
+
+if [ "${#DROPPED_ALLELES[@]}" -gt 0 ]; then
+    log_warn "Dropped alleles (not in netMHCpan library):"
+    for A in "${DROPPED_ALLELES[@]}"; do
+        log_warn "    ✘  ${A}"
+    done
+fi
+
+if [ "${#VALID_ALLELES[@]}" -eq 0 ]; then
+    die "No valid HLA alleles remaining for ${SAMPLE_NAME} after filtering. Cannot run netMHCpan."
+fi
+
+# Build cleaned comma-separated allele string for netMHCpan
+CLEAN_HLA=$(IFS=','; echo "${VALID_ALLELES[*]}")
+log_ok "Proceeding with ${#VALID_ALLELES[@]} allele(s): ${CLEAN_HLA}"
+echo ""
+
+# =============================================================================
+#  RUN netMHCpan PER PEPTIDE SIZE (8, 9, 10, 11)
+# =============================================================================
 for SIZE in 8 9 10 11; do
     FASTA_FILE="${PREFIX}_Fusions_chim2.junc2.size${SIZE}.fasta"
     if [ ! -f "${FASTA_FILE}" ]; then
@@ -35,7 +100,8 @@ for SIZE in 8 9 10 11; do
     TMP_FILE="${OUT_FILE}.tmp"
 
     run_cmd "netMHCpan (${SAMPLE_NAME}, size=${SIZE})" \
-        bash -c "'${NETMHCPAN_BIN}/netMHCpan' -a '${HLA_ALLELES}' -f '${FASTA_FILE}' -l '${SIZE}' -xls -xlsfile '${OUT_FILE}' -inptype 0 > '${TMP_FILE}'"
+        bash -c "cd '${NETMHCPAN_BIN}' && ./netMHCpan -a '${CLEAN_HLA}' -f '${FASTA_FILE}' -l '${SIZE}' -xls -xlsfile '${OUT_FILE}' -inptype 0 > '${TMP_FILE}'"
 done
 
-log_ok "Step 3 complete for ${SAMPLE_NAME} (sizes 8-11)."
+log_ok "Step 3 complete for ${SAMPLE_NAME}."
+log_ok "Alleles used: ${CLEAN_HLA}"

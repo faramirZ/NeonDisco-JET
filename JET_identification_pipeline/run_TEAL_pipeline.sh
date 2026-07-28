@@ -265,7 +265,7 @@ FAILED_SAMPLES=()
 SAMPLE_NUM=0
 PIPELINE_START=$(date +%s)
 
-while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS; do
+while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS || [ -n "${NAME}" ]; do
     [ -z "${NAME}" ] && continue
     [[ "${NAME}" =~ ^#.* ]] && continue
     SAMPLE_NUM=$((SAMPLE_NUM+1))

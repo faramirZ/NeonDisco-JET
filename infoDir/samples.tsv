@@ -1,1 +1,1 @@
-379T	/home/faramir/repos/neondisco-jet/inputData/379T_R1.fastq	/home/faramir/repos/neondisco-jet/inputData/379T_R2.fastq	HLA-A11:01,HLA-A02:03,HLA-B13:01,HLA-B38:02,HLA-C07:02,HLA-C03:04	/home/faramir/repos/neondisco-jet/metadataDir/379T.repeatmasker_reformat.txt
+379T	/home/faramir/data/neondisco-jet/inputData/379T_R1_trim.fastq.gz	/home/faramir/data/neondisco-jet/inputData/379T_R2_trim.fastq.gz	HLA-A11:01,HLA-A02:03,HLA-B13:01,HLA-B38:02,HLA-C07:02,HLA-C03:04	/home/faramir/repos/neondisco-jet/metadataDir/379T.repeatmasker_reformat.txt
