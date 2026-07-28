@@ -56,7 +56,6 @@ metadataDir/*
 
 #dependency files
 netMHCpan-4.2/*
-dependancies/*
 dependencies/netMHCpan-4.2cstatic.Linux.tar
 dependencies/netMHCpan-4.2_license.txt
 
