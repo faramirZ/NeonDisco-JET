@@ -316,9 +316,9 @@ Create all required directories before the first run:
 ```bash
 # Output and working directories
 mkdir -p ~/data/neondisco-jet/outputData
-mkdir -p ~/data/neondisco-jet/logDir
+mkdir -p ~/data/neondisco-jet/outputData/logs
 mkdir -p ~/data/neondisco-jet/tmpData
-mkdir -p ~/data/neondisco-jet/ErrorDir
+mkdir -p ~/data/neondisco-jet/starIndexesDir
 
 # Repo metadata and input directories
 mkdir -p ~/repos/neondisco-jet/metadataDir
