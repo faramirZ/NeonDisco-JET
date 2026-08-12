@@ -51,7 +51,7 @@ This pipeline identifies, quantifies, and selects JETs from RNA-seq data and pre
 
 > Burbage M\*, Rocañín-Arjó A\* et al. *Epigenetically controlled tumor antigens derived from splice junctions between exons and transposable elements.* **Science Immunology**, 2023.
 
-This repository adapts the original pipeline for **human GRCh38** samples and wraps all steps into a single master orchestrator (`run_JET_pipeline.sh`) that supports multiple samples in a single run.
+This repository adapts the original pipeline for **human GRCh38** samples and wraps all steps into a single master orchestrator (`run_TEAL_pipeline.sh`) that supports multiple samples in a single run.
 
 ---
 
@@ -106,7 +106,7 @@ RNA-seq FASTQ
 ```
 neondisco-jet/
 ├── JET_identification_pipeline/
-│   ├── run_JET_pipeline.sh              # Master orchestrator (entry point)
+│   ├── run_TEAL_pipeline.sh              # Master orchestrator (entry point)
 │   ├── step1_alignment.sh               # STAR alignment + BAM processing
 │   ├── step2_jet_identification.sh      # JET calling wrapper (calls R script)
 │   ├── step3_netmhcpan.sh              # netMHCpan binding prediction
@@ -252,12 +252,12 @@ All you need to do is pass the desired index directory path via `--star-index` w
 
 ```bash
 # Example: first run on a fresh server — index will be built automatically
-./run_JET_pipeline.sh \
+./run_TEAL_pipeline.sh \
     --star-index /home/faramir/data/neondisco-jet/starIndexesDir \
     ...
 
 # Subsequent runs — index already exists, build is skipped automatically
-./run_JET_pipeline.sh \
+./run_TEAL_pipeline.sh \
     --star-index /home/faramir/data/neondisco-jet/starIndexesDir \
     ...
 ```
@@ -333,7 +333,7 @@ mkdir -p ~/repos/neondisco-jet/dependencies
 > |---|---|---|
 > | `starIndexesDir/` | `step1_alignment.sh` | Before genome indexing on first run |
 > | `outputData/<sample>_<date>/` | `step1_alignment.sh` | At the start of each sample run |
-> | `outputData/logs/` | `run_JET_pipeline.sh` | At pipeline startup |
+> | `outputData/logs/` | `run_TEAL_pipeline.sh` | At pipeline startup |
 > | `tmpData/STAR_<sample>_<date>/` | `step1_alignment.sh` | During STAR alignment |
 
 ---
@@ -345,7 +345,7 @@ mkdir -p ~/repos/neondisco-jet/dependencies
 ```bash
 cd ~/repos/neondisco-jet/JET_identification_pipeline
 
-chmod +x run_JET_pipeline.sh
+chmod +x run_TEAL_pipeline.sh
 chmod +x step1_alignment.sh
 chmod +x step2_jet_identification.sh
 chmod +x step3_netmhcpan.sh
@@ -407,11 +407,12 @@ done < ~/repos/neondisco-jet/infoDir/samples.tsv
 ## 9. Running the Pipeline
 
 ### 9.1 Full run (all 4 steps)
+Multiple lines:
 
 ```bash
 cd ~/repos/neondisco-jet/JET_identification_pipeline
 
-./run_JET_pipeline.sh \
+./run_TEAL_pipeline.sh \
     --samples /home/faramir/repos/neondisco-jet/infoDir/samples.tsv \
     --genome hg38 \
     --genome-fasta /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.dna.primary_assembly.fa \
@@ -427,6 +428,12 @@ cd ~/repos/neondisco-jet/JET_identification_pipeline
     --threads 16
 ```
 
+One liner:
+
+```
+cd ~/repos/neondisco-jet/JET_identification_pipeline && ./run_TEAL_pipeline.sh --samples /home/faramir/repos/neondisco-jet/infoDir/samples.tsv --genome hg38 --genome-fasta /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.dna.primary_assembly.fa --gtf /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.115.gtf --star-index /home/faramir/data/neondisco-jet/starIndexesDir --star-bin /home/faramir/repos/neondisco-jet/.pixi/envs/default/bin --samtools-bin /home/faramir/repos/neondisco-jet/.pixi/envs/default/bin --rscript-bin /opt/R/4.5.3/bin/Rscript --r-script /home/faramir/repos/neondisco-jet/JET_identification_pipeline/JET_analysis_filtered.R --netmhcpan-bin /home/faramir/repos/neondisco-jet/dependencies/netMHCpan-4.2 --outputs-dir /home/faramir/data/neondisco-jet/outputData --tmp-dir /home/faramir/data/neondisco-jet/tmpData --threads 16
+```
+
 It is strongly recommended to run this inside a `tmux` session so it continues if your SSH connection drops:
 
 ```bash
@@ -439,9 +446,9 @@ tmux new -s jet_pipeline
 ### 9.2 Skip steps (for reprocessing)
 
 If Step 1 (STAR alignment) has already been run successfully and you only want to rerun Steps 2–4:
-
+Multiple lines:
 ```bash
-./run_JET_pipeline.sh \
+./run_TEAL_pipeline.sh \
     --samples /home/faramir/repos/neondisco-jet/infoDir/samples.tsv \
     --genome hg38 \
     --gtf /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.115.gtf \
@@ -451,14 +458,26 @@ If Step 1 (STAR alignment) has already been run successfully and you only want t
     --outputs-dir /home/faramir/data/neondisco-jet/outputData \
     --skip-step1
 ```
+One liner:
+
+```
+cd ~/repos/neondisco-jet/JET_identification_pipeline && ./run_TEAL_pipeline.sh --samples /home/faramir/repos/neondisco-jet/infoDir/samples.tsv --genome hg38 --gtf /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.115.gtf --rscript-bin /opt/R/4.5.3/bin/Rscript --r-script /home/faramir/repos/neondisco-jet/JET_identification_pipeline/JET_analysis_filtered.R --netmhcpan-bin /home/faramir/repos/neondisco-jet/dependencies/netMHCpan-4.2 --outputs-dir /home/faramir/data/neondisco-jet/outputData --skip-step1
+```
 
 To rerun only the binder aggregation (e.g. after changing thresholds):
+Multiple lines:
 
 ```bash
-./run_JET_pipeline.sh \
+./run_TEAL_pipeline.sh \
     --samples /home/faramir/repos/neondisco-jet/infoDir/samples.tsv \
     --outputs-dir /home/faramir/data/neondisco-jet/outputData \
     --skip-step1 --skip-step2 --skip-step3
+```
+
+One liner:
+
+```
+cd ~/repos/neondisco-jet/JET_identification_pipeline && ./run_TEAL_pipeline.sh --samples /home/faramir/repos/neondisco-jet/infoDir/samples.tsv --outputs-dir /home/faramir/data/neondisco-jet/outputData --skip-step1 --skip-step2 --skip-step3
 ```
 
 ### 9.3 All available flags

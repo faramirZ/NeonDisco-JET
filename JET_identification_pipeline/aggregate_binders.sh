@@ -62,13 +62,13 @@ for SIZE in 8 9 10 11; do
     N_ALLELES=$(awk -F'\t' 'NR==3{ print int((NF-5)/4); exit }' "${NETFILE}")
 
     # Log allele count and rank column positions for this size file
-    log_info "  [size=${SIZE}] Detected ${N_ALLELES} allele(s) in netMHCpan output"
+    log_info "  [size=${SIZE}] Detected ${N_ALLELES} allele(s) in netMHCpan output" >&2
     RANK_COL_INFO=""
     for (( i=1; i<=N_ALLELES; i++ )); do
         COL=$(( 3 + 4*i ))
         RANK_COL_INFO="${RANK_COL_INFO} allele${i}→col${COL}"
     done
-    log_info "  [size=${SIZE}] Rank columns:${RANK_COL_INFO}"
+    log_info "  [size=${SIZE}] Rank columns:${RANK_COL_INFO}" >&2
 
     awk -F'\t' -v sz="${SIZE}" -v n_alleles="${N_ALLELES}" -v lookup="${TMP_DIR_LOCAL}/lookup_size${SIZE}.tsv" '
     BEGIN{
