@@ -1,0 +1,128 @@
+Sep-28 09:39:12.479 [main] DEBUG nextflow.cli.Launcher - $> nextflow run main.nf -c conf/nextflow.config -resume --manifestPath /home/faramir/repos/neondisco-jet/infoDir/379T_nf_manifest.tsv --outputDir /home/faramir/data/neondisco-jet/nf_outputs --genomeFa /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.dna.primary_assembly.fa --gtf /home/faramir/repos/neondisco-jet/inputData/Homo_sapiens.GRCh38.115.gtf --sjdbOverhang 100
+Sep-28 09:39:12.581 [main] DEBUG nextflow.cli.CmdRun - N E X T F L O W  ~  version 26.04.6
+Sep-28 09:39:12.607 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; embedded=false; plugins-dir=/home/faramir/.nextflow/plugins; core-plugins: nf-amazon@3.9.2,nf-azure@1.22.6,nf-cloudcache@0.6.0,nf-codecommit@0.5.3,nf-console@1.3.0,nf-google@1.27.3,nf-k8s@1.5.4,nf-seqera@0.21.1,nf-tower@1.28.2,nf-wave@1.21.0
+Sep-28 09:39:12.633 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Sep-28 09:39:12.634 [main] INFO  o.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Sep-28 09:39:12.638 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.14.1 in 'deployment' mode
+Sep-28 09:39:12.657 [main] DEBUG nextflow.util.RetryConfig - Missing nextflow session - using default retry config
+Sep-28 09:39:12.801 [main] DEBUG nextflow.plugin.PluginUpdater - Using plugin repository: HttpPluginRepository [registry]; url=https://registry.nextflow.io/api
+Sep-28 09:39:12.807 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Sep-28 09:39:12.847 [main] DEBUG nextflow.config.ConfigBuilder - User config file: /home/faramir/repos/neondisco-jet/nextflow/nextflow-folder/conf/nextflow.config
+Sep-28 09:39:12.849 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/faramir/repos/neondisco-jet/nextflow/nextflow-folder/conf/nextflow.config
+Sep-28 09:39:12.854 [main] DEBUG nextflow.config.ConfigParserFactory - Using config parser v2
+Sep-28 09:39:12.874 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Sep-28 09:39:13.331 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Sep-28 09:39:13.331 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins resolved requirement=[]
+Sep-28 09:39:13.345 [main] DEBUG n.secret.LocalSecretsProvider - Secrets store: /home/faramir/.nextflow/secrets/store.json
+Sep-28 09:39:13.348 [main] DEBUG nextflow.secret.SecretsLoader - Discovered secrets providers: [nextflow.secret.LocalSecretsProvider@3e3315d9] - activable => nextflow.secret.LocalSecretsProvider@3e3315d9
+Sep-28 09:39:13.360 [main] DEBUG nextflow.cli.CmdRun - Launching `main.nf` [furious_tuckerman] - revision: 2bd133c319
+Sep-28 09:39:13.433 [main] DEBUG nextflow.Session - Session UUID: e85aa53a-c06e-471f-8122-ed9a486c4577
+Sep-28 09:39:13.433 [main] DEBUG nextflow.Session - Run name: furious_tuckerman
+Sep-28 09:39:13.433 [main] DEBUG nextflow.Session - Executor pool size: 48
+Sep-28 09:39:13.441 [main] DEBUG nextflow.file.FilePorter - File porter settings maxRetries=3; maxTransfers=50; pollTimeout=null
+Sep-28 09:39:13.446 [main] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'FileTransfer' minSize=10; maxSize=144; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Sep-28 09:39:13.464 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 26.04.6 build 12646
+  Created: 09-07-2026 18:49 UTC 
+  System: Linux 6.8.0-142-generic
+  Runtime: Groovy 4.0.31 on OpenJDK 64-Bit Server VM 25.0.2-internal-adhoc.rattler.src
+  Encoding: UTF-8 (UTF-8)
+  Process: 1931586@crmy-penguin [127.0.1.1]
+  CPUs: 48 - Mem: 125.5 GB (48.5 GB) - Swap: 8 GB (4.5 GB)
+Sep-28 09:39:13.490 [main] DEBUG nextflow.Session - Work-dir: /GB/faramir/neondisco-jet/nf_work [ext2/ext3]
+Sep-28 09:39:13.523 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Sep-28 09:39:13.531 [main] DEBUG nextflow.Session - Observer factory (v2): LinObserverFactory
+Sep-28 09:39:13.533 [main] DEBUG nextflow.Session - Observer factory (v2): DefaultObserverFactory
+Sep-28 09:39:13.569 [main] DEBUG nextflow.cache.CacheFactory - Using Nextflow cache factory: nextflow.cache.DefaultCacheFactory
+Sep-28 09:39:13.576 [main] DEBUG nextflow.util.CustomThreadPool - Creating default thread pool > poolSize: 49; maxThreads: 1000
+Sep-28 09:39:13.650 [main] DEBUG nextflow.Session - Session start
+Sep-28 09:39:13.658 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow started -- trace file: /home/faramir/data/neondisco-jet/nf_outputs/reports/trace.txt
+Sep-28 09:39:13.660 [main] DEBUG nextflow.script.ScriptLoaderFactory - Using script parser v2
+Sep-28 09:39:14.218 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Sep-28 09:39:14.483 [main] INFO  nextflow.Nextflow - Using existing STAR index: /home/faramir/data/neondisco-jet/starIndexes_2.7.11b/star_index
+Sep-28 09:39:14.502 [main] DEBUG n.script.dsl.ProcessConfigBuilder - Config settings `withLabel:qcReadsFastQC` matches labels `qcReadsFastQC` for process with name QC_RAW
+Sep-28 09:39:14.505 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-28 09:39:14.506 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-28 09:39:14.516 [main] DEBUG nextflow.executor.Executor - [warm up] executor > local
+Sep-28 09:39:14.525 [main] DEBUG n.processor.LocalPollingMonitor - Creating local task monitor for executor 'local' > cpus=48; memory=125.5 GB; capacity=48; pollInterval=100ms; dumpInterval=5m
+Sep-28 09:39:14.528 [main] DEBUG n.processor.TaskPollingMonitor - >>> barrier register (monitor: local)
+Sep-28 09:39:14.592 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'QC_RAW': maxForks=0; fair=false; array=0
+Sep-28 09:39:14.642 [main] DEBUG n.script.dsl.ProcessConfigBuilder - Config settings `withLabel:trimReads` matches labels `trimReads` for process with name TRIM_READS_FASTP
+Sep-28 09:39:14.643 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-28 09:39:14.644 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-28 09:39:14.645 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'TRIM_READS_FASTP': maxForks=0; fair=false; array=0
+Sep-28 09:39:14.650 [main] DEBUG n.script.dsl.ProcessConfigBuilder - Config settings `withLabel:qcReadsFastQC` matches labels `qcReadsFastQC` for process with name QC_TRIMMED
+Sep-28 09:39:14.652 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-28 09:39:14.652 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-28 09:39:14.653 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'QC_TRIMMED': maxForks=0; fair=false; array=0
+Sep-28 09:39:14.660 [main] DEBUG n.script.dsl.ProcessConfigBuilder - Config settings `withLabel:alignReadsStar` matches labels `alignReadsStar` for process with name ALIGN_READS_STAR
+Sep-28 09:39:14.661 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: local
+Sep-28 09:39:14.662 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'local'
+Sep-28 09:39:14.663 [main] DEBUG nextflow.processor.TaskProcessor - Creating process 'ALIGN_READS_STAR': maxForks=0; fair=false; array=0
+Sep-28 09:39:14.668 [main] DEBUG nextflow.Session - Process names: TRIM_READS_FASTP, QC_READS_FASTQC, QC_TRIMMED, BUILD_STAR_INDEX, QC_RAW, ALIGN_READS_STAR
+Sep-28 09:39:14.671 [main] DEBUG nextflow.Session - Igniting dataflow network (6)
+Sep-28 09:39:14.680 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > QC_RAW
+Sep-28 09:39:14.680 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > TRIM_READS_FASTP
+Sep-28 09:39:14.681 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > QC_TRIMMED
+Sep-28 09:39:14.681 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > ALIGN_READS_STAR
+Sep-28 09:39:14.682 [main] DEBUG nextflow.script.ScriptRunner - Parsed script files:
+  _nf_script_bfd5dc686c3c5000: /home/faramir/repos/neondisco-jet/nextflow/nextflow-folder/modules/qc_reads_fastqc.nf
+  Main: /home/faramir/repos/neondisco-jet/nextflow/nextflow-folder/main.nf
+  _nf_script_0826bf2fc71b807c: /home/faramir/repos/neondisco-jet/nextflow/nextflow-folder/modules/trim_reads_fastp.nf
+  _nf_script_c3f3f61190736e02: /home/faramir/repos/neondisco-jet/nextflow/nextflow-folder/modules/align_reads_star.nf
+  _nf_script_bbca9bfc9674c875: /home/faramir/repos/neondisco-jet/nextflow/nextflow-folder/modules/build_star_index.nf
+Sep-28 09:39:14.682 [main] DEBUG nextflow.script.ScriptRunner - > Awaiting termination 
+Sep-28 09:39:14.682 [main] DEBUG nextflow.Session - Session await
+Sep-28 09:39:14.965 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-28 09:39:14.969 [Task submitter] INFO  nextflow.Session - [90/673725] Submitted process > TRIM_READS_FASTP (379T)
+Sep-28 09:39:14.992 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-28 09:39:14.994 [Task submitter] INFO  nextflow.Session - [cb/225ee1] Submitted process > QC_RAW (379T (raw))
+Sep-28 09:44:14.676 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 2 -- submitted tasks are shown below
+~> TaskHandler[id: 1; name: TRIM_READS_FASTP (379T); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/90/6737250a1111419385ae8320b5c4be]
+~> TaskHandler[id: 2; name: QC_RAW (379T (raw)); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/cb/225ee1cc79acc9a4e4d9f2143f4990]
+Sep-28 09:49:14.699 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 2 -- submitted tasks are shown below
+~> TaskHandler[id: 1; name: TRIM_READS_FASTP (379T); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/90/6737250a1111419385ae8320b5c4be]
+~> TaskHandler[id: 2; name: QC_RAW (379T (raw)); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/cb/225ee1cc79acc9a4e4d9f2143f4990]
+Sep-28 09:54:14.793 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 2 -- submitted tasks are shown below
+~> TaskHandler[id: 1; name: TRIM_READS_FASTP (379T); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/90/6737250a1111419385ae8320b5c4be]
+~> TaskHandler[id: 2; name: QC_RAW (379T (raw)); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/cb/225ee1cc79acc9a4e4d9f2143f4990]
+Sep-28 09:57:24.242 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 1; name: TRIM_READS_FASTP (379T); status: COMPLETED; exit: 0; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/90/6737250a1111419385ae8320b5c4be]
+Sep-28 09:57:24.244 [Task monitor] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'TaskFinalizer' minSize=10; maxSize=144; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Sep-28 09:57:24.283 [TaskFinalizer-1] DEBUG nextflow.util.ThreadPoolBuilder - Creating thread pool 'PublishDir' minSize=10; maxSize=144; workQueue=LinkedBlockingQueue[-1]; allowCoreThreadTimeout=false
+Sep-28 09:57:24.298 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-28 09:57:24.298 [Task submitter] INFO  nextflow.Session - [56/90da68] Submitted process > ALIGN_READS_STAR (379T)
+Sep-28 09:57:24.315 [Task submitter] DEBUG n.executor.local.LocalTaskHandler - Launch cmd line: /bin/bash -ue .command.run
+Sep-28 09:57:24.316 [Task submitter] INFO  nextflow.Session - [55/de0ace] Submitted process > QC_TRIMMED (379T (trimmed))
+Sep-28 09:59:14.884 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 3 -- submitted tasks are shown below
+~> TaskHandler[id: 2; name: QC_RAW (379T (raw)); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/cb/225ee1cc79acc9a4e4d9f2143f4990]
+~> TaskHandler[id: 4; name: ALIGN_READS_STAR (379T); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/56/90da68f71db74cb3002293040795c3]
+~> TaskHandler[id: 3; name: QC_TRIMMED (379T (trimmed)); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/55/de0ace588535938c4df848aa8d782a]
+Sep-28 10:01:09.622 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 2; name: QC_RAW (379T (raw)); status: COMPLETED; exit: 0; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/cb/225ee1cc79acc9a4e4d9f2143f4990]
+Sep-28 10:04:14.961 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 2 -- submitted tasks are shown below
+~> TaskHandler[id: 4; name: ALIGN_READS_STAR (379T); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/56/90da68f71db74cb3002293040795c3]
+~> TaskHandler[id: 3; name: QC_TRIMMED (379T (trimmed)); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/55/de0ace588535938c4df848aa8d782a]
+Sep-28 10:09:15.034 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 2 -- submitted tasks are shown below
+~> TaskHandler[id: 4; name: ALIGN_READS_STAR (379T); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/56/90da68f71db74cb3002293040795c3]
+~> TaskHandler[id: 3; name: QC_TRIMMED (379T (trimmed)); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/55/de0ace588535938c4df848aa8d782a]
+Sep-28 10:14:15.085 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 2 -- submitted tasks are shown below
+~> TaskHandler[id: 4; name: ALIGN_READS_STAR (379T); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/56/90da68f71db74cb3002293040795c3]
+~> TaskHandler[id: 3; name: QC_TRIMMED (379T (trimmed)); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/55/de0ace588535938c4df848aa8d782a]
+Sep-28 10:14:33.990 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 4; name: ALIGN_READS_STAR (379T); status: COMPLETED; exit: 0; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/56/90da68f71db74cb3002293040795c3]
+Sep-28 10:19:15.130 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor local > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[id: 3; name: QC_TRIMMED (379T (trimmed)); status: RUNNING; exit: -; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/55/de0ace588535938c4df848aa8d782a]
+Sep-28 10:19:38.042 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[id: 3; name: QC_TRIMMED (379T (trimmed)); status: COMPLETED; exit: 0; error: -; workDir: /GB/faramir/neondisco-jet/nf_work/55/de0ace588535938c4df848aa8d782a]
+Sep-28 10:19:38.057 [main] DEBUG nextflow.Session - Session await > all processes finished
+Sep-28 10:19:38.143 [Task monitor] DEBUG n.processor.TaskPollingMonitor - <<< barrier arrives (monitor: local) - terminating tasks monitor poll loop
+Sep-28 10:19:38.144 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Sep-28 10:19:38.165 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'TaskFinalizer' shutdown completed (hard=false)
+Sep-28 10:19:38.166 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'PublishDir' shutdown completed (hard=false)
+Sep-28 10:19:38.189 [main] INFO  nextflow.script.BaseScript - Pipeline completed at: 2026-09-28T10:19:38.168113189Z
+Sep-28 10:19:38.192 [main] INFO  nextflow.script.BaseScript - Execution status: OK
+Sep-28 10:19:38.195 [main] INFO  nextflow.Nextflow - Duration: 40m 25s
+Sep-28 10:19:38.222 [main] DEBUG n.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=4; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=7h 15m 20s; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=3; peakCpus=20; peakMemory=56 GB; ]
+Sep-28 10:19:38.419 [main] DEBUG nextflow.trace.ReportObserver - Workflow completed -- rendering execution report
+Sep-28 10:19:39.793 [main] DEBUG nextflow.trace.TimelineObserver - Workflow completed -- rendering execution timeline
+Sep-28 10:19:39.915 [main] DEBUG nextflow.trace.TraceFileObserver - Workflow completed -- saving trace file
+Sep-28 10:19:39.958 [main] DEBUG nextflow.cache.CacheDB - Closing CacheDB done
+Sep-28 10:19:39.990 [main] DEBUG nextflow.util.ThreadPoolManager - Thread pool 'FileTransfer' shutdown completed (hard=false)
+Sep-28 10:19:39.991 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

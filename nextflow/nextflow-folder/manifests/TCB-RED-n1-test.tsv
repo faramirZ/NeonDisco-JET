@@ -1,0 +1,2 @@
+sampleName	bamPath	baiPath	dnaBamPath	dnaBaiPath
+BICR10-siNT-R1	s3://crmy-gb-main/reddisco/RNAseq-STAR-out-for-Nextflow/BICR10-siNT-R1_L1_Aligned.sortedByCoord.out.bam	s3://crmy-gb-main/reddisco/RNAseq-STAR-out-for-Nextflow/BICR10-siNT-R1_L1_Aligned.sortedByCoord.out.bam.bai	s3://crmy-gb-main/reddisco/sWGS-out-for-Nextflow/BICR10.sorted.bam	s3://crmy-gb-main/reddisco/sWGS-out-for-Nextflow/BICR10.sorted.bam.bai
