@@ -53,7 +53,7 @@ fi
 
 # =============================================================================
 #  ALGORITHMS
-#  All confirmed available in /home/faramir/images/pVACtools.sif
+#  All confirmed available in pVACtools.sif image v4.0.10 (2023-12-20) on crmy-penguin
 # =============================================================================
 ALGORITHMS="NetMHCpan NetMHCpanEL MHCflurryEL BigMHC_IM PRIME DeepImmuno"
 log_info "Algorithms           : ${ALGORITHMS}"
