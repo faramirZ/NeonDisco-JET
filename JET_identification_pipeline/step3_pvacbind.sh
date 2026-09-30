@@ -41,8 +41,15 @@ log_info "HLA alleles (raw)    : ${HLA_ALLELES}"
 #  samples.tsv uses netMHCpan format:  HLA-A11:01
 #  pVACbind requires:                  HLA-A*11:01 (asterisk after gene letter)
 # =============================================================================
-PVAC_HLA=$(echo "${HLA_ALLELES}" | sed 's/HLA-\([ABC]\)\([0-9]\)/HLA-\1*\2/g')
-log_info "HLA alleles (pVACbind): ${PVAC_HLA}"
+# Convert HLA format if needed: HLA-A11:01 → HLA-A*11:01
+# Checks first — if asterisk already present, skips conversion entirely
+if echo "${HLA_ALLELES}" | grep -qE "HLA-[ABC]\*"; then
+    PVAC_HLA="${HLA_ALLELES}"
+    log_info "HLA alleles (pVACbind format): ${PVAC_HLA} (already correct, no conversion needed)"
+else
+    PVAC_HLA=$(echo "${HLA_ALLELES}" | sed 's/HLA-\([ABC]\)\([0-9]\)/HLA-\1*\2/g')
+    log_info "HLA alleles (pVACbind format): ${PVAC_HLA} (converted from netMHCpan format)"
+fi
 
 # =============================================================================
 #  ALGORITHMS
