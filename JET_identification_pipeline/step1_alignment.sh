@@ -77,12 +77,11 @@ run_cmd "STAR alignment (${SAMPLE_NAME})" \
         --outFileNamePrefix "${PREFIX}_" \
         --outTmpDir "${TMP_DIR}/STAR_${SAMPLE_NAME}_${DAY}_$$" \
         --outSAMtype BAM SortedByCoordinate \
-        --bamRemoveDuplicatesType UniqueIdentical \
         --outFilterMismatchNoverLmax 0.04 \
         --outMultimapperOrder Random \
         --outFilterMultimapNmax 1000 \
         --winAnchorMultimapNmax 1000 \
-        --chimOutType WithinBAM \
+        --chimOutType Junctions WithinBAM \
         --chimSegmentMin 10 \
         --chimJunctionOverhangMin 10
 

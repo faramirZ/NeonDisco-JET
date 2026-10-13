@@ -87,7 +87,7 @@ Tool paths:
   --samtools-bin DIR     Directory containing samtools binary
   --rscript-bin PATH     Path to Rscript binary
   --r-script PATH        Path to JET_analysis_filtered.R
-  --netmhcpan-bin DIR    Directory containing netMHCpan binary
+  --pvactools-sif PATH   Path to pVACtools Apptainer SIF image
 
 Run control:
   --outputs-dir DIR      Output directory root (default: ./outputData)
@@ -96,7 +96,7 @@ Run control:
   --read-length N        STAR sjdbOverhang (default: 100)
   --skip-step1           Skip STAR alignment (Step 1 output must already exist)
   --skip-step2           Skip JET identification (Step 2 output must already exist)
-  --skip-step3           Skip netMHCpan (Step 3 output must already exist)
+  --skip-step3           Skip pVACbind (Step 3 output must already exist)
   --skip-step4           Skip binder aggregation
   -h, --help             Show this help
 
@@ -110,7 +110,7 @@ Example:
       --samtools-bin /opt/.pixi/envs/default/bin \\
       --rscript-bin /opt/R/4.5.3/bin/Rscript \\
       --r-script ./JET_analysis_filtered.R \\
-      --netmhcpan-bin /opt/netMHCpan-4.2/Linux_x86_64/bin
+      --pvactools-sif /home/faramir/images/pVACtools.sif
 EOF
 exit 1
 }
@@ -127,7 +127,7 @@ STAR_BIN=""
 SAMTOOLS_BIN=""
 RSCRIPT_BIN=""
 R_SCRIPT=""
-NETMHCPAN_BIN=""
+PVACTOOLS_SIF=""
 OUTPUTS_DIR="$(pwd)/outputData"
 TMP_DIR="$(pwd)/tmpData"
 THREADS=8
@@ -153,7 +153,7 @@ while [ "$#" -gt 0 ]; do
         --samtools-bin)   SAMTOOLS_BIN="$2"; shift 2 ;;
         --rscript-bin)    RSCRIPT_BIN="$2"; shift 2 ;;
         --r-script)       R_SCRIPT="$2"; shift 2 ;;
-        --netmhcpan-bin)  NETMHCPAN_BIN="$2"; shift 2 ;;
+        --pvactools-sif)  PVACTOOLS_SIF="$2"; shift 2 ;;
         --outputs-dir)    OUTPUTS_DIR="$2"; shift 2 ;;
         --tmp-dir)        TMP_DIR="$2"; shift 2 ;;
         --threads)        THREADS="$2"; shift 2 ;;
@@ -202,7 +202,8 @@ if [ "${SKIP_STEP2}" = false ]; then
 fi
 
 if [ "${SKIP_STEP3}" = false ]; then
-    [ -n "${NETMHCPAN_BIN}" ] || die "Missing --netmhcpan-bin (required unless --skip-step3)"
+    [ -n "${PVACTOOLS_SIF}" ] || die "Missing --pvactools-sif (required unless --skip-step3)"
+    require_file "${PVACTOOLS_SIF}" "pVACtools SIF image"
 fi
 
 case "${GENOME}" in
@@ -211,7 +212,7 @@ case "${GENOME}" in
 esac
 
 export STAR_BIN SAMTOOLS_BIN GENOME_FASTA GTF_FILE STAR_INDEX_DIR OUTPUTS_DIR TMP_DIR
-export READ_LENGTH THREADS RSCRIPT_BIN R_SCRIPT GENOME NETMHCPAN_BIN
+export READ_LENGTH THREADS RSCRIPT_BIN R_SCRIPT GENOME PVACTOOLS_SIF
 
 # =============================================================================
 #  PIPELINE CONFIGURATION SUMMARY
@@ -323,15 +324,17 @@ while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS || [ -n "${NAME}" ]; do
         log_warn "[Step 2/4] Skipped for ${NAME}"
     fi
 
-    # ── STEP 3: NETMHCPAN ──────────────────────────────────────────────────
+    # ── STEP 3: pVACbind MHC-I BINDING PREDICTION ─────────────────────────
     if [ "${SAMPLE_OK}" = true ] && [ "${SKIP_STEP3}" = false ]; then
-        log_info "[Step 3/4] ── Starting netMHCpan binding prediction for: ${NAME}"
-        log_info "[Step 3/4]    HLA alleles : ${HLA}"
+        log_info "[Step 3/4] ── Starting pVACbind binding prediction for: ${NAME}"
+        log_info "[Step 3/4]    HLA alleles  : ${HLA}"
+        log_info "[Step 3/4]    SIF image    : ${PVACTOOLS_SIF}"
+        log_info "[Step 3/4]    Algorithms   : NetMHCpan NetMHCpanEL MHCflurryEL BigMHC_IM PRIME DeepImmuno"
         log_info "[Step 3/4]    Running binding prediction for peptide sizes 8, 9, 10, 11..."
 
         STEP3_START=$(date +%s)
-        "${SCRIPT_DIR}/step3_netmhcpan.sh" "${NAME}" "${OUT_SAMPLE_DIR}" "${HLA}" \
-            || { log_error "Step 3 — netMHCpan FAILED for ${NAME}"; FAILED_SAMPLES+=("${NAME}:step3"); SAMPLE_OK=false; }
+        "${SCRIPT_DIR}/step3_pvacbind.sh" "${NAME}" "${OUT_SAMPLE_DIR}" "${HLA}" \
+            || { log_error "Step 3 — pVACbind FAILED for ${NAME}"; FAILED_SAMPLES+=("${NAME}:step3"); SAMPLE_OK=false; }
 
         if [ "${SAMPLE_OK}" = true ]; then
             STEP3_END=$(date +%s)
@@ -345,7 +348,7 @@ while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS || [ -n "${NAME}" ]; do
     # ── STEP 4: BINDER AGGREGATION ─────────────────────────────────────────
     if [ "${SAMPLE_OK}" = true ] && [ "${SKIP_STEP4}" = false ]; then
         log_info "[Step 4/4] ── Aggregating binders across all sizes for: ${NAME}"
-        log_info "[Step 4/4]    Applying rank<2 (binder) and rank<0.5 (strong binder) filters..."
+        log_info "[Step 4/4]    Applying IC50<500nM (binder) and IC50<50nM (strong binder) filters..."
 
         STEP4_START=$(date +%s)
         "${SCRIPT_DIR}/aggregate_binders.sh" "${NAME}" "${OUT_SAMPLE_DIR}" \
