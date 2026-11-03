@@ -1,4 +1,4 @@
-# NeonDisco-TEAL — JET Identification Pipeline
+# NeonDisco-TEAL — JET Identification Pipeline V.1.1.0
 
 ```
   ███╗   ██╗███████╗ ██████╗ ███╗   ██╗██████╗ ██╗███████╗ ██████╗ ██████╗
