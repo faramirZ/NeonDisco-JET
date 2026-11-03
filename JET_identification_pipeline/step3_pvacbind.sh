@@ -115,9 +115,10 @@ for SIZE in 8 9 10 11; do
     log_info "[size=${SIZE}] Output dir  : ${PVAC_OUT_DIR}"
     log_info "[size=${SIZE}] Alleles     : ${PVAC_HLA}"
 
+#remove no-mount tmp flag, pVACbind cannot writes and read from IEDB properly and let you in a loop.
+
     run_cmd "pVACbind (${SAMPLE_NAME}, size=${SIZE})" \
         apptainer exec \
-            --no-mount tmp \
             -B /GB:/GB \
             -B /home/faramir:/home/faramir \
             "${PVACTOOLS_SIF}" \
@@ -127,6 +128,9 @@ for SIZE in 8 9 10 11; do
                 "${PVAC_HLA}" \
                 ${ALGORITHMS} \
                 "${PVAC_OUT_DIR}" \
+                --iedb-install-directory /opt/iedb \
+                --allele-specific-binding-thresholds \
+                --netmhc-stab \
                 -e1 "${SIZE}" \
                 -t "${THREADS}" \
                 ${TMP_FLAG}

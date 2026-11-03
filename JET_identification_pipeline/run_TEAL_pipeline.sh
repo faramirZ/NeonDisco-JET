@@ -73,8 +73,6 @@ Usage: $(basename "$0") --samples FILE [OPTIONS]
 Required:
   --samples FILE        Tab-separated metadata file. One row per sample:
                          name<TAB>R1.fastq.gz<TAB>R2.fastq.gz<TAB>HLA_alleles<TAB>repeatmasker_file
-                         Example row:
-                         379T   /data/379T_R1.fastq   /data/379T_R2.fastq   HLA-A11:01,HLA-A02:03   /meta/379T.repeatmasker_reformat.txt
 
 Reference/Genome options:
   --genome GENOME        Genome build: hg19 | hg38 | mm9 | mm10 (default: hg38)
@@ -97,7 +95,7 @@ Run control:
   --skip-step1           Skip STAR alignment (Step 1 output must already exist)
   --skip-step2           Skip JET identification (Step 2 output must already exist)
   --skip-step3           Skip pVACbind (Step 3 output must already exist)
-  --skip-step4           Skip binder aggregation
+  --skip-step4           Skip binder compilation
   -h, --help             Show this help
 
 Example:
@@ -144,25 +142,26 @@ SKIP_STEP4=false
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        --samples)        SAMPLES_FILE="$2"; shift 2 ;;
-        --genome)         GENOME="$2"; shift 2 ;;
-        --genome-fasta)   GENOME_FASTA="$2"; shift 2 ;;
-        --gtf)            GTF_FILE="$2"; shift 2 ;;
-        --star-index)     STAR_INDEX_DIR="$2"; shift 2 ;;
-        --star-bin)       STAR_BIN="$2"; shift 2 ;;
-        --samtools-bin)   SAMTOOLS_BIN="$2"; shift 2 ;;
-        --rscript-bin)    RSCRIPT_BIN="$2"; shift 2 ;;
-        --r-script)       R_SCRIPT="$2"; shift 2 ;;
-        --pvactools-sif)  PVACTOOLS_SIF="$2"; shift 2 ;;
-        --outputs-dir)    OUTPUTS_DIR="$2"; shift 2 ;;
-        --tmp-dir)        TMP_DIR="$2"; shift 2 ;;
-        --threads)        THREADS="$2"; shift 2 ;;
-        --read-length)    READ_LENGTH="$2"; shift 2 ;;
-        --skip-step1)     SKIP_STEP1=true; shift ;;
-        --skip-step2)     SKIP_STEP2=true; shift ;;
-        --skip-step3)     SKIP_STEP3=true; shift ;;
-        --skip-step4)     SKIP_STEP4=true; shift ;;
-        -h|--help)        usage ;;
+        --samples)          SAMPLES_FILE="$2"; shift 2 ;;
+        --genome)           GENOME="$2"; shift 2 ;;
+        --genome-fasta)     GENOME_FASTA="$2"; shift 2 ;;
+        --gtf)              GTF_FILE="$2"; shift 2 ;;
+        --star-index)       STAR_INDEX_DIR="$2"; shift 2 ;;
+        --star-bin)         STAR_BIN="$2"; shift 2 ;;
+        --samtools-bin)     SAMTOOLS_BIN="$2"; shift 2 ;;
+        --rscript-bin)      RSCRIPT_BIN="$2"; shift 2 ;;
+        --r-script)         R_SCRIPT="$2"; shift 2 ;;
+        --pvactools-sif)    PVACTOOLS_SIF="$2"; shift 2 ;;
+        --outputs-dir)      OUTPUTS_DIR="$2"; shift 2 ;;
+        --tmp-dir)          TMP_DIR="$2"; shift 2 ;;
+
+        --threads)          THREADS="$2"; shift 2 ;;
+        --read-length)      READ_LENGTH="$2"; shift 2 ;;
+        --skip-step1)       SKIP_STEP1=true; shift ;;
+        --skip-step2)       SKIP_STEP2=true; shift ;;
+        --skip-step3)       SKIP_STEP3=true; shift ;;
+        --skip-step4)       SKIP_STEP4=true; shift ;;
+        -h|--help)          usage ;;
         *) echo "ERROR: Unknown argument: $1"; usage ;;
     esac
 done
@@ -171,7 +170,6 @@ print_banner
 
 # =============================================================================
 #  SETUP LOG
-#  (must come before any log_* calls that reference MASTER_LOG)
 # =============================================================================
 LOG_DIR="${OUTPUTS_DIR}/logs"
 mkdir -p "${LOG_DIR}" "${OUTPUTS_DIR}" "${TMP_DIR}"
@@ -227,10 +225,10 @@ log_info "Threads             : ${THREADS}"
 log_info "Read length         : ${READ_LENGTH}"
 log_info "Outputs dir         : ${OUTPUTS_DIR}"
 log_info "Tmp dir             : ${TMP_DIR}"
-log_info "Skip Step 1 (STAR)  : ${SKIP_STEP1}"
-log_info "Skip Step 2 (JET)   : ${SKIP_STEP2}"
-log_info "Skip Step 3 (MHC)   : ${SKIP_STEP3}"
-log_info "Skip Step 4 (Agg)   : ${SKIP_STEP4}"
+log_info "Skip Step 1 (STAR)   : ${SKIP_STEP1}"
+log_info "Skip Step 2 (JET)    : ${SKIP_STEP2}"
+log_info "Skip Step 3 (MHC)    : ${SKIP_STEP3}"
+log_info "Skip Step 4 (Compile): ${SKIP_STEP4}"
 log_info "════════════════════════════════════════"
 
 # =============================================================================
@@ -260,7 +258,7 @@ done < "${SAMPLES_FILE}"
 log_info "Found ${N_SAMPLES} sample(s) to process"
 
 # =============================================================================
-#  RUN PIPELINE PER SAMPLE
+#  RUN PIPELINE PER SAMPLE (Steps 1-3)
 # =============================================================================
 FAILED_SAMPLES=()
 SAMPLE_NUM=0
@@ -289,7 +287,6 @@ while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS || [ -n "${NAME}" ]; do
         if [ "${SAMPLE_OK}" = true ]; then
             STEP1_END=$(date +%s)
             log_ok "[Step 1/4]    STAR alignment complete"
-            log_ok "[Step 1/4]    Chimeric BAM sorting complete"
             log_ok "[Step 1/4]    BAM index files created"
             log_ok "[Step 1/4] ── Step 1 finished for ${NAME} ($(( STEP1_END - STEP1_START ))s) → ${OUT_SAMPLE_DIR}"
         fi
@@ -345,25 +342,29 @@ while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS || [ -n "${NAME}" ]; do
         log_warn "[Step 3/4] Skipped for ${NAME}"
     fi
 
-    # ── STEP 4: BINDER AGGREGATION ─────────────────────────────────────────
+    # ── STEP 4: COMPILE BINDERS ────────────────────────────────────────────
     if [ "${SAMPLE_OK}" = true ] && [ "${SKIP_STEP4}" = false ]; then
-        log_info "[Step 4/4] ── Aggregating binders across all sizes for: ${NAME}"
-        log_info "[Step 4/4]    Applying IC50<500nM (binder) and IC50<50nM (strong binder) filters..."
+        log_info "[Step 4/4] ── Compiling pVACbind results for: ${NAME}"
+        log_info "[Step 4/4]    Combining sizes 8-11, adding Junction[width] column..."
 
         STEP4_START=$(date +%s)
-        "${SCRIPT_DIR}/aggregate_binders.sh" "${NAME}" "${OUT_SAMPLE_DIR}" \
-            || { log_error "Step 4 — Aggregation FAILED for ${NAME}"; FAILED_SAMPLES+=("${NAME}:step4"); SAMPLE_OK=false; }
+        "${SCRIPT_DIR}/step4_compiler.sh" "${NAME}" "${OUT_SAMPLE_DIR}" \
+            || { log_error "Step 4 — Compilation FAILED for ${NAME}"; FAILED_SAMPLES+=("${NAME}:step4"); SAMPLE_OK=false; }
 
         if [ "${SAMPLE_OK}" = true ]; then
             STEP4_END=$(date +%s)
-            log_ok "[Step 4/4]    Binder table written: ${OUT_SAMPLE_DIR}/all_sizes_binders.tsv"
+            COMPILED_OUT="${OUT_SAMPLE_DIR}/${NAME}_final_combined_data_TEAL.tsv"
+            TOTAL_ROWS=$(tail -n +2 "${COMPILED_OUT}" 2>/dev/null | wc -l || echo 0)
+            TOTAL_COLS=$(head -1 "${COMPILED_OUT}" 2>/dev/null | awk -F'\t' '{print NF}' || echo 0)
+            log_ok "[Step 4/4]    Output: ${COMPILED_OUT}"
+            log_ok "[Step 4/4]    Rows: ${TOTAL_ROWS}  |  Columns: ${TOTAL_COLS}"
             log_ok "[Step 4/4] ── Step 4 finished for ${NAME} ($(( STEP4_END - STEP4_START ))s)"
         fi
     elif [ "${SKIP_STEP4}" = true ]; then
         log_warn "[Step 4/4] Skipped for ${NAME}"
     fi
 
-    # ── SAMPLE SUMMARY ─────────────────────────────────────────────────────
+    # ── PER-SAMPLE SUMMARY ─────────────────────────────────────────────────
     SAMPLE_END=$(date +%s)
     SAMPLE_ELAPSED=$(printf "%02d:%02d:%02d" \
         $(( (SAMPLE_END-SAMPLE_START)/3600 )) \
@@ -372,7 +373,10 @@ while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS || [ -n "${NAME}" ]; do
 
     if [ "${SAMPLE_OK}" = true ]; then
         log_ok "══ Sample ${NAME} — all steps completed in ${SAMPLE_ELAPSED}"
-        log_info "   Output directory: ${OUT_SAMPLE_DIR}"
+        log_info "   Output directory : ${OUT_SAMPLE_DIR}"
+        if [ "${SKIP_STEP4}" = false ]; then
+        log_info "   Final output     : ${OUT_SAMPLE_DIR}/${NAME}_final_combined_data_TEAL.tsv"
+        fi
     else
         log_error "══ Sample ${NAME} — finished with errors after ${SAMPLE_ELAPSED}"
         log_error "   Check log for details: ${MASTER_LOG}"
