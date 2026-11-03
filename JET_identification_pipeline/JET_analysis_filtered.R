@@ -452,10 +452,19 @@ if(! is.null(chimeric.file)){
     chimeric$chr.to   = ifelse(grepl("^chr", chimeric$chr.to),   chimeric$chr.to,   paste0("chr", chimeric$chr.to))
     chimeric          = subset(chimeric, chr.from %in% chromosomes & chr.to %in% chromosomes)
     chimeric          = subset(chimeric, type %in% c(1, 2))
-    chimeric$n        = 1
-    chimeric          = aggregate(n ~ chr.from + pos.from + str.from + repeat.from + chr.to + pos.to + str.to + repeat.to + type,
-                                  data = chimeric,
-                                  FUN  = sum)
+    chimeric$n = rep.int(1, nrow(chimeric))
+    junction.cols = c("chr.from", "pos.from", "str.from", "repeat.from",
+                      "chr.to", "pos.to", "str.to", "repeat.to", "type", "n")
+    chimeric = chimeric[, junction.cols, drop = FALSE]
+
+    if (nrow(chimeric) > 0) {
+        chimeric = aggregate(
+            n ~ chr.from + pos.from + str.from + repeat.from +
+                chr.to + pos.to + str.to + repeat.to + type,
+            data = chimeric,
+            FUN = sum
+        )
+    }
     if(verbose) cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), "\tlibrary size filtering \n")
     chimeric          = subset(chimeric, n/libsize >= 2*1e-7)
     chimeric$pos.from = chimeric$pos.from - 1
@@ -479,8 +488,8 @@ if(! is.null(junctions.file)){
     junctions$strand   = with(junctions, ifelse(strand == 1, "+", ifelse(strand == 2, "-", "*")))
     junctions$pos.from = with(junctions, ifelse(strand == "+", start - 1, end + 1))
     junctions$pos.to   = with(junctions, ifelse(strand == "+", end + 1, start - 1))
-    junctions          = with(junctions, data.frame(chr.from = chr, pos.from = pos.from, str.from = strand, repeat.from = 0,
-                                                    chr.to = chr, pos.to = pos.to, str.to = strand, repeat.to = 0,
+    junctions          = with(junctions, data.frame(chr.from = chr, pos.from = pos.from, str.from = strand, repeat.from = rep(0, length(chr)),
+                                                    chr.to = chr, pos.to = pos.to, str.to = strand, repeat.to = rep(0, length(chr)),
                                                     type = motif, n = unique + multi))
     if(verbose) cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), "\tlibrary size filtering \n")
     junctions          = subset(junctions, n/libsize >= 2*1e-7)
@@ -490,8 +499,8 @@ if(! is.null(junctions.file)){
 
 if(verbose) cat("Bind chimeric and junction tables\n")
 t = Sys.time()
-chimeric.all = rbind(data.frame(file = "Chimeric", chimeric),
-                     data.frame(file = "Junction", junctions))
+chimeric.all = rbind(data.frame(file = rep("Chimeric", NROW(chimeric)), chimeric),
+                     data.frame(file = rep("Junction", NROW(junctions)), junctions))
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
 
 

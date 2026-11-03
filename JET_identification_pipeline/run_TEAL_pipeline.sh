@@ -382,7 +382,7 @@ while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS || [ -n "${NAME}" ]; do
         log_error "   Check log for details: ${MASTER_LOG}"
     fi
 
-done < "${SAMPLES_FILE}" 2>&1 | tee -a "${MASTER_LOG}"
+done < "${SAMPLES_FILE}" > >(tee -a "${MASTER_LOG}") 2>&1
 
 # =============================================================================
 #  FINAL PIPELINE SUMMARY
