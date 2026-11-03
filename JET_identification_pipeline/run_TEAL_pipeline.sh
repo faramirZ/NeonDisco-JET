@@ -291,7 +291,7 @@ while IFS=$'\t' read -r NAME R1 R2 HLA REPEATS || [ -n "${NAME}" ]; do
             log_ok "[Step 1/4] ── Step 1 finished for ${NAME} ($(( STEP1_END - STEP1_START ))s) → ${OUT_SAMPLE_DIR}"
         fi
     else
-        OUT_SAMPLE_DIR=$(ls -td "${OUTPUTS_DIR}/${NAME}"_* 2>/dev/null | head -1)
+        OUT_SAMPLE_DIR=$(ls -td "${OUTPUTS_DIR}/${NAME}"_* 2>/dev/null | head -1) || OUT_SAMPLE_DIR=""
         if [ -n "${OUT_SAMPLE_DIR}" ]; then
             log_ok "[Step 1/4] Skipped — using existing output: ${OUT_SAMPLE_DIR}"
         else
