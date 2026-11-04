@@ -350,8 +350,8 @@ get.fusion.sequence = function(donor, acceptor){
     }
 
     sequences = NULL
-    for(i in 1:length(donor.seq)){
-        for(j in 1:length(acceptor.seq)){
+    for(i in seq_along(donor.seq)){
+        for(j in seq_along(acceptor.seq)){
             sequence.tmp        = list(list(Donor = donor.seq[i][[1]], Acceptor = acceptor.seq[j][[1]]))
             names(sequence.tmp) = paste(names(donor.seq[i][[1]]), names(acceptor.seq[j][[1]]), sep = ">")
             sequences           = c(sequences, sequence.tmp)
@@ -362,7 +362,7 @@ get.fusion.sequence = function(donor, acceptor){
 
 get.peptides = function(sequences, ids, order = c("R1R2", "R2R1")){
     name = names(sequences)
-    for(j in 1:length(name)){
+    for(j in seq_along(name)){
         donor.full      = sequences[[name[j]]]$Donor
         donor.substr    = substr(x = donor.full, start = nchar(donor.full) + 1 - (size * 3 - 1), stop = nchar(donor.full))
         acceptor.full   = sequences[[name[j]]]$Acceptor
@@ -626,20 +626,32 @@ t = Sys.time()
 chimeric.combine.gr.tmp = subset(chimeric.combine.gr, filter)
 ids                     = NULL
 sequences.all           = NULL
-for(i in 1:length(chimeric.combine.gr.tmp)){
+for(i in seq_along(chimeric.combine.gr.tmp)){
     if(verbose) cat(sprintf("%4i / %4i\tREAD1>READ2\n", i, length(chimeric.combine.gr.tmp)))
     sequences     = get.fusion.sequence(donor = chimeric.combine.gr.tmp[i], acceptor = chimeric.combine.gr.tmp[i]$acc)
     sequences.all = c(sequences.all, lapply(names(sequences), function(n){ c(Id = n, Donor = as.character(sequences[[n]]$Donor), Acceptor = as.character(sequences[[n]]$Acceptor)) }))
     ids           = get.peptides(sequences = sequences, ids = ids, order = "R1R2")
 }
 
-sequences.all.rbind           = as.data.frame(do.call(rbind, sequences.all))
-colnames(sequences.all.rbind) = c("Id", "Donor", "Acceptor")
-ids.collapse                  = do.call(rbind, lapply(ids, paste, collapse = "/"))
-ids.collapse                  = as.data.frame(ids.collapse[nchar(rownames(ids.collapse)) >= size, ])
-colnames(ids.collapse)        = "Name"
-ids.collapse$ID               = 1:nrow(ids.collapse)
-ids.collapse$Sequence         = rownames(ids.collapse)
+if (length(sequences.all) > 0) {
+    sequences.all.rbind = as.data.frame(do.call(rbind, sequences.all))
+    colnames(sequences.all.rbind) = c("Id", "Donor", "Acceptor")
+} else {
+    sequences.all.rbind = data.frame(
+        Id = character(), Donor = character(), Acceptor = character()
+    )
+}
+
+if (length(ids) > 0) {
+    ids.collapse = do.call(rbind, lapply(ids, paste, collapse = "/"))
+    keep = nchar(rownames(ids.collapse)) >= size
+    ids.collapse = as.data.frame(ids.collapse[keep, , drop = FALSE])
+    colnames(ids.collapse) = "Name"
+} else {
+    ids.collapse = data.frame(Name = character())
+}
+ids.collapse$ID = seq_len(nrow(ids.collapse))
+ids.collapse$Sequence = rownames(ids.collapse)
 fusions                       = AAStringSet(ids.collapse$Sequence)
 names(fusions)                = ids.collapse$ID
 if(verbose) cat("\tdone in ", round(difftime(Sys.time(), t, units = 'sec'), 2), "s\n", sep = "")
