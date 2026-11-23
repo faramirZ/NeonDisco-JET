@@ -179,5 +179,20 @@ workflow {
             }
 
         PREDICT_PVACBIND(prediction_inputs)
+                PREDICT_PVACBIND.out.predictions
+            .map { sample, size, dir, ids ->
+                def report = dir.resolve("MHC_Class_I/${sample}.MHC_I.all_epitopes.tsv")
+                def hasRows = report.exists() && report.toFile().withReader { reader ->
+                    reader.readLine()          // skip the header
+                    reader.readLine() != null  // at least one prediction
+                }
+                tuple(sample, hasRows)
+            }
+            .groupTuple(size: 4)
+            .subscribe { sample, results ->
+                if (!results.any { it }) {
+                    error "pVACbind produced no predictions for ${sample} across sizes 8 to 11"
+                }
+            }
     }
 }
