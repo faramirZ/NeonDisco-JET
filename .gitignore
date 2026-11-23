@@ -70,3 +70,6 @@ infoDir/missing.tsv
 infoDir/samples.tsv
 infoDir/379TPVAC.tsv
 infoDir/379T_nf_manifest.tsv
+
+#Nextflow
+.nextflow/*

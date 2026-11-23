@@ -65,13 +65,6 @@ t = Sys.time()
 ipak = function(list.packages) {
     invisible(lapply(list.packages, library, character.only = TRUE))
 }
-    list.new.packages = list.packages[!(list.packages %in% installed.packages()[, "Package"])]
-    if(length(list.new.packages)){
-        if(!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-        BiocManager::install(list.new.packages, dependencies = TRUE)
-    }
-    sapply(list.packages, require, character.only = T, quietly = T)
-}
 
 list.packages = c("GenomicFeatures",
                   "GenomicAlignments",
