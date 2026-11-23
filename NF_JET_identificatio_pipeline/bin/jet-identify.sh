@@ -15,9 +15,9 @@ gtf=$6
 r_script=$7
 genome=$8
 
-rscript_bin="${RSCRIPT_BIN:-/opt/R/4.5.3/bin/Rscript}"
+rscript_bin="${RSCRIPT_BIN:-Rscript}"
 
-[[ -x "$rscript_bin" ]] || {
+command -v "$rscript_bin" >/dev/null || {
     echo "Rscript executable not found: $rscript_bin" >&2
     exit 1
 }
@@ -44,7 +44,7 @@ fi
 echo "Sample: $sample; uniquely mapped reads: $libsize"
 
 for size in 8 9 10 11; do
-    "$rscript_bin" "$r_script" \
+    "$rscript_bin" --vanilla "$r_script" \
         --chimeric "$chimeric" \
         --junction "$junctions" \
         --genome "$genome" \

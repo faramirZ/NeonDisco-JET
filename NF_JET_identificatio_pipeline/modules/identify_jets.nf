@@ -1,6 +1,8 @@
 process IDENTIFY_JETS {
     tag "${sampleName}"
     label 'identifyJets'
+    
+    container "${params.container__jet_r}"
 
     publishDir {
         "${params.outputDir}/JET-identification/${sampleName}"

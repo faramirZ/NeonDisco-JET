@@ -1,4 +1,4 @@
-#!/opt/R/4.5.3/bin/Rscript
+#!/usr/bin/env Rscript
 
 #### created by Alexandre Houy and Christel Goudot
 #### modified and adapted by Muhammad Faramir
@@ -9,13 +9,9 @@ graphics.off()
 
 tall = Sys.time()
 
-# R library path
-lib.local = "/home/faramir/repos/neondisco-jet/renv/library/linux-ubuntu-noble/R-4.5/x86_64-pc-linux-gnu"
-.libPaths(new = lib.local)
-if(! require("getopt", quietly = TRUE)) stop("Package 'getopt' not found in lib.local\n")  # ADD THIS
-
-options(useHTTPS = F, BioC_mirror = "http://bioconductor.org")
-
+# Load packages from the image's site and base libraries.
+.libPaths(.Library.site)
+library(getopt)
 
 ##### Getops #####
 #--------------------------------------------------------------------------------
@@ -66,7 +62,9 @@ if(flag) stop(getopt(spec, usage = T))
 
 if(verbose) cat("Loading packages\n")
 t = Sys.time()
-ipak = function(list.packages){
+ipak = function(list.packages) {
+    invisible(lapply(list.packages, library, character.only = TRUE))
+}
     list.new.packages = list.packages[!(list.packages %in% installed.packages()[, "Package"])]
     if(length(list.new.packages)){
         if(!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
