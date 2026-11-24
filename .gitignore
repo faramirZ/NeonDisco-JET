@@ -73,3 +73,4 @@ infoDir/379T_nf_manifest.tsv
 
 #Nextflow
 .nextflow/*
+.nextflow.log*
