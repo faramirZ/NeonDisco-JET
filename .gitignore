@@ -57,19 +57,19 @@ metadataDir/*
 
 #dependency files
 dependencies/netMHCpan-4.2/*
-dependencies/netMHCpan-4.2cstatic.Linux.tar
-dependencies/netMHCpan-4.2_license.txt
+dependencies/*
 !dependencies/netMHCpan-4.2/netMHCpan-4.2.txt
 
 # Other
 Log.out
 
 #infoDir
-infoDir/ER+samples.tsv
-infoDir/missing.tsv
-infoDir/samples.tsv
-infoDir/379TPVAC.tsv
-infoDir/379T_nf_manifest.tsv
+infoDir/*
+!infoDir/example.tsv
+
+#inputData
+inputData/*
+!inputData/inputData.txt
 
 #Nextflow
 .nextflow/*
