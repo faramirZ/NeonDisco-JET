@@ -1,4 +1,23 @@
-# NeonDisco-JET | Nextflow pipeline
+# NeonDisco-TEAL — JET Identification Pipeline V.2.1.0
+
+```
+  ███╗   ██╗███████╗ ██████╗ ███╗   ██╗██████╗ ██╗███████╗ ██████╗ ██████╗
+  ████╗  ██║██╔════╝██╔═══██╗████╗  ██║██╔══██╗██║██╔════╝██╔════╝██╔═══██╗
+  ██╔██╗ ██║█████╗  ██║   ██║██╔██╗ ██║██║  ██║██║███████╗██║     ██║   ██║
+  ██║╚██╗██║██╔══╝  ██║   ██║██║╚██╗██║██║  ██║██║╚════██║██║     ██║   ██║
+  ██║ ╚████║███████╗╚██████╔╝██║ ╚████║██████╔╝██║███████║╚██████╗╚██████╔╝
+  ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═╝╚══════╝ ╚═════╝ ╚═════╝
+
+  ████████╗███████╗ █████╗ ██╗
+  ╚══██╔══╝██╔════╝██╔══██╗██║
+     ██║   █████╗  ███████║██║
+     ██║   ██╔══╝  ██╔══██║██║
+     ██║   ███████╗██║  ██║███████╗
+     ╚═╝   ╚══════╝╚═╝  ╚═╝╚══════╝
+```
+
+> **JET identification and MHC-I binding prediction, adapted for human GRCh38**
+> Based on Burbage & Rocañín-Arjó et al., *Science Immunology* 2023
 
 NeonDisco-JET identifies splice junctions between exons and transposable elements (JETs) from paired-end RNA-seq data. The Nextflow workflow aligns reads, identifies JETs and generates peptides, then runs pVACbind for MHC class I prediction. The [Bash pipeline guide](../readme.md) also covers Step 4, which compiles the final TEAL table.
 
